@@ -22,7 +22,7 @@ public class Bag
 	 * This constructor adds 100 tiles with the correct characters
 	 * and values to the bag, thus creating it
 	 *
-	 * @throws Exception - if someone tries to create another bag
+	 * @throws Exception  if someone tries to create another bag
 	 */
 	private Bag() throws Exception
 	{
@@ -82,9 +82,9 @@ public class Bag
 	}// end addTiles
 	
 	/**
-	 * Returns the unique instance of the bag and
+	 * Returns the unique instance of the bag and if it doesn't exist yet, it creates it
 	 *
-	 * @return - the unique instance of the bag
+	 * @return the unique instance of the bag
 	 */
 	public static synchronized Bag instance()
 	{
@@ -106,7 +106,7 @@ public class Bag
 	/**
 	 * Returns and removes one random tile from the bag
 	 *
-	 * @return - a random tile from the bag
+	 * @return  a random tile from the bag
 	 */
 	public Tile takeTile()
 	{
@@ -125,7 +125,7 @@ public class Bag
 	 * Adds one tile to the bag only if it is a missing tile.
 	 * If it's not a missing tile, throws an exception to prevent cheating
 	 * 
-	 * @param tile - the tile to be added
+	 * @param tile  the tile to be added
 	 */
 	public void putTile(Tile tile) throws Exception
 	{

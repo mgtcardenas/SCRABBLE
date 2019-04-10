@@ -13,13 +13,14 @@ public class Main
 		String result = wordExists("PLASTIC") ? "IT EXISTS" : "IT DOES NOT EXIST";
 		System.out.println(result);
 		
-		Bag bag = Bag.instance();
-		System.out.println(bag);
-		Tile tile = Bag.instance().takeTile();
-		Bag.instance().putTile(tile);
+		Board board = Board.instance();
+		System.out.println(board);
 		
-		bag = Bag.instance();
-		System.out.println(bag);
+		GridSpace gridSpace = board.getGrid()[0][0];
+		gridSpace.setUsed(true);
+		
+		board = Board.instance();
+		System.out.println(board);
 	}// end main
 	
 	/**
