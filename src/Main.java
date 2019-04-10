@@ -8,10 +8,18 @@ public class Main
 {
 	private static final String DICTIONARY_PATH = "C:\\Users\\mgtca\\IdeaProjects\\SCRABBLE\\src\\english-dictionary.txt";
 	
-	public static void main(String[] args)
+	public static void main(String[] args) throws Exception
 	{
-		String result = wordExists("plastic") ? "IT EXISTS" : "IT DOES NOT EXIST";
+		String result = wordExists("PLASTIC") ? "IT EXISTS" : "IT DOES NOT EXIST";
 		System.out.println(result);
+		
+		Bag bag = Bag.instance();
+		System.out.println(bag);
+		Tile tile = Bag.instance().takeTile();
+		Bag.instance().putTile(tile);
+		
+		bag = Bag.instance();
+		System.out.println(bag);
 	}// end main
 	
 	/**
