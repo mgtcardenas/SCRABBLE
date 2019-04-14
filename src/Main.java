@@ -10,17 +10,9 @@ public class Main
 	
 	public static void main(String[] args) throws Exception
 	{
-		String result = wordExists("PLASTIC") ? "IT EXISTS" : "IT DOES NOT EXIST";
-		System.out.println(result);
-		
-		Board board = Board.instance();
-		System.out.println(board);
-		
-		GridSpace gridSpace = board.getGrid()[0][0];
-		gridSpace.setUsed(true);
-		
-		board = Board.instance();
-		System.out.println(board);
+		Game scrabble = new Game();
+		scrabble.play();
+		System.out.println("Just to make a point");
 	}// end main
 	
 	/**

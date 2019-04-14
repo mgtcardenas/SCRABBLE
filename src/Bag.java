@@ -22,7 +22,7 @@ public class Bag
 	 * This constructor adds 100 tiles with the correct characters
 	 * and values to the bag, thus creating it
 	 *
-	 * @throws Exception  if someone tries to create another bag
+	 * @throws Exception if someone tries to create another bag
 	 */
 	private Bag() throws Exception
 	{
@@ -106,7 +106,7 @@ public class Bag
 	/**
 	 * Returns and removes one random tile from the bag
 	 *
-	 * @return  a random tile from the bag
+	 * @return a random tile from the bag
 	 */
 	public Tile takeTile()
 	{
@@ -125,7 +125,7 @@ public class Bag
 	 * Adds one tile to the bag only if it is a missing tile.
 	 * If it's not a missing tile, throws an exception to prevent cheating
 	 * 
-	 * @param tile  the tile to be added
+	 * @param tile the tile to be added
 	 */
 	public void putTile(Tile tile) throws Exception
 	{
@@ -137,4 +137,15 @@ public class Bag
 		else
 			throw new Exception("CHEATER, CHEATER, PUMPKIN EATER");
 	}// end putTile
+	
+	/**
+	 * Determine whether the bag is empty and has no more tiles in it.
+	 * If the tiles list is size 0, then we can say that the bag is empty
+	 * 
+	 * @return true if the bag is empty / false if it is not
+	 */
+	public boolean isEmpty()
+	{
+		return this.tiles.size() == 0;
+	}// end isEmpty
 }// end Bag - class
