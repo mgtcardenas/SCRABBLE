@@ -9,42 +9,59 @@ public class Game
 	 * decide who goes first in the game. Thus we will know who is the first player
 	 * and who is the second player
 	 */
-	public void assignFirstAndSecondPlayer() throws Exception
+	public void assignFirstAndSecondPlayer(String playerOneName, String playerTwoName) throws Exception
 	{
-		//TODO: What if the letter is the same? We should do this all over again until it isn't
 		Player	player1;
 		Player	player2;
 		
-		player1	= new Player();
-		player2	= new Player();
+		player1	= new Player(playerOneName);
+		player2	= new Player(playerTwoName);
 		
-		// Both players take out one tile
-		player1.takeTile();
-		player2.takeTile();
+		do
+		{
+			// If the players had any tiles, they must return them
+			player1.returnTiles();
+			player2.returnTiles();
+			
+			// Both players take out one tile
+			player1.takeTile();
+			player2.takeTile();
+			
+			if (player1.getTiles().get(0).getLetter() < player2.getTiles().get(0).getLetter())
+			{
+				firstPlayer		= player1;
+				secondPlayer	= player2;
+			}
+			else if (player1.getTiles().get(0).getLetter() > player2.getTiles().get(0).getLetter())
+			{
+				firstPlayer		= player2;
+				secondPlayer	= player1;
+			}// end if - else
+			
+		}while (player1.getTiles().get(0).getLetter() == player2.getTiles().get(0).getLetter()); // end do-while
 		
-		if (player1.getTiles().get(0).getLetter() < player2.getTiles().get(0).getLetter())
-		{
-			firstPlayer		= player1;
-			secondPlayer	= player2;
-		}
-		else
-		{
-			firstPlayer		= player2;
-			secondPlayer	= player1;
-		}// end if - else
+		firstPlayer.returnTiles();
+		secondPlayer.returnTiles();
 	}// end assignFirstAndSecondPlayer
 	
 	public void play() throws Exception
 	{
-		assignFirstAndSecondPlayer();
-		
+		assignFirstAndSecondPlayer("Marco", "Lilia");
+		System.out.println("Just for the sake of watching");
 		// Players return the tile and take 7 tiles each
-		firstPlayer.retakeTiles();
-		secondPlayer.retakeTiles();
+		firstPlayer.refillTiles();
+		secondPlayer.refillTiles();
 		
+		System.out.println("First Player " + firstPlayer.getName() + "'s Turn");
+		firstPlayer.makeMove();
+		
+		System.out.println("Second Player " + secondPlayer.getName() + "'s Turn");
+		secondPlayer.makeMove();
 		// do
 		// {
+		// System.out.println("First Player's Turn");
 		// firstPlayer.makeMove();
+		// System.out.println("Second Player's Turn");
 		// secondPlayer.makeMove();
 		// }while (!bag.isEmpty()); // end do-while
 		//

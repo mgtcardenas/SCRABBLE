@@ -1,5 +1,11 @@
 import java.util.Stack;
 
+/**
+ * @author Marco Cárdenas
+ *
+ *          The Caretaker is an object that holds all the Memento objects on a stack.
+ *          The 
+ */
 public class Caretaker
 {
 	static Stack<Memento> stack = new Stack<>();

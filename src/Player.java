@@ -10,6 +10,7 @@ import java.util.Scanner;
  */
 public class Player
 {
+	private String		name;
 	private int			score;
 	private List<Tile>	tiles;
 	
@@ -17,13 +18,19 @@ public class Player
 	 * When we create a new player, his/her score is 0
 	 * and he has no tiles to play with
 	 */
-	public Player()
+	public Player(String name)
 	{
+		this.name	= name;
 		this.score	= 0;
 		this.tiles	= new LinkedList<Tile>();
 	}// end Player - constructor
 	
 	// region Getters & Setters
+	public String getName()
+	{
+		return name;
+	}// end getName
+	
 	public int getScore()
 	{
 		return score;
@@ -38,8 +45,7 @@ public class Player
 	{
 		return tiles;
 	}// end getTiles
-	
-	// endregion Getters & Setters
+		// endregion Getters & Setters
 	
 	/**
 	 * Makes the player take a tile from the Bag
@@ -60,9 +66,30 @@ public class Player
 		for (Tile t : this.tiles)
 		{
 			Bag.instance().putTile(t);
-			this.tiles.remove(t);
+			this.tiles.remove(t); // very important! If not, a tile will be duplicated
 		}// end foreach
 	}// end returnTiles
+	
+	/**
+	 * The player refills his tiles so he / she now has 7 as long as the bag is not empty
+	 */
+	public void refillTiles()
+	{
+		while (this.tiles.size() != 7 && !Bag.instance().isEmpty())
+			this.takeTile();
+	}// end refillTiles
+	
+	/**
+	 * The player changes all of his/her tiles to the bag and takes another 7 if possible
+	 *
+	 * @throws Exception - If the player attempts to cheat by returning tiles that don't belong to the set
+	 */
+	public void retakeTiles() throws Exception
+	{
+		this.returnTiles();
+		for (int i = 0; i < 7; i++)
+			this.takeTile();
+	}// end retakeTiles
 	
 	/**
 	 * The player performs a move that can either be forming a word, passing or retaking tiles
@@ -85,7 +112,7 @@ public class Player
 			switch (option)
 			{
 				case 1:
-					putDownWord();
+					placeWord();
 					madeMove = true;
 					break;
 				
@@ -110,30 +137,41 @@ public class Player
 	
 	/**
 	 * The player attempts to form a word with it's tiles by putting them
-	 * on a specific GridSpace of the Board
+	 * on a specific GridSpace of the Board. A player can place one of his / her
+	 * Tiles, cancel the word (causing a memento to be used) or confirm the word
+	 * (which will test if the placed Tiles form a word)
 	 */
-	public void putDownWord()
+	public void placeWord()
 	{
-		// Give me the coordinates
-		// Give me the letter that you want to
-	}// end putDownWord
+		int		x, y, index;
+		
+		Scanner	sc	= new Scanner(System.in);
+		System.out.println("Give me the coordinates...");
+		System.out.println("X: ");
+		x = sc.nextInt();
+		System.out.println("Y: ");
+		y = sc.nextInt();
+		System.out.println("Which letter do you want to put there?");
+		index = sc.nextInt();
+		
+		this.tiles.get(index).setGridSpace(Board.instance().getGrid()[x][y]);
+		Board.instance().getGrid()[x][y].setTile(this.tiles.get(index));
+	}// end placeWord
 	
 	/**
-	 * The player changes all of his/her tiles to the bag and takes another 7 if possible
+	 * Puts a single Tile on the Board
 	 */
-	public void retakeTiles() throws Exception
+	public void placeTile()
 	{
-		this.returnTiles();
-		for (int i = 0; i < 7; i++)
-			this.takeTile();
-	}// end retakeTiles
+	
+	}// end placeTile
 	
 	/**
 	 * The player does nothing, he / she waits for his / her opponent to make a move
 	 */
 	public void pass()
 	{
-		System.out.println(this.getClass().getSimpleName() + "passed");
+		System.out.println(this.getName() + " passed");
 	}// end pass
 	
 	/**
@@ -148,11 +186,12 @@ public class Player
 	
 	/**
 	 * Sets the state of the tiles based on a memento previously
+	 * 
 	 * @param memento the memento with which the state of the tiles is rebuilt
 	 */
 	public void setMemento(Memento memento)
 	{
-		//TODO: Make this also put away the tiles from the board or something
+		// TODO: Make this also put away the tiles from the board or something
 		this.tiles = memento.getState();
 	}// end setMemento
 }// end Player - class

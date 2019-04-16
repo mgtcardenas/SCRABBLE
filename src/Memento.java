@@ -1,8 +1,13 @@
 import java.util.List;
 
+/**
+ * @author Marco Cárdenas
+ *
+ *         A Memento rememebers which tiles a player had before putting them down on the Board
+ */
 public class Memento
 {
-	List<Tile> state;
+	private List<Tile> state;
 	
 	public Memento(List<Tile> aState)
 	{
