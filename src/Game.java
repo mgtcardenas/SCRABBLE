@@ -4,6 +4,12 @@ public class Game
 	Board	board;
 	Bag		bag;
 	
+	public Game()
+	{
+		this.board	= Board.instance();
+		this.bag	= Bag.instance();
+	}// end Game - constructor
+	
 	/**
 	 * Simulates the behavior when two players take a single tile from the Bag to
 	 * decide who goes first in the game. Thus we will know who is the first player
@@ -47,13 +53,17 @@ public class Game
 	public void play() throws Exception
 	{
 		assignFirstAndSecondPlayer("Marco", "Lilia");
-		System.out.println("Just for the sake of watching");
-		// Players return the tile and take 7 tiles each
+		
+		// Players take 7 tiles each
 		firstPlayer.refillTiles();
 		secondPlayer.refillTiles();
 		
 		System.out.println("First Player " + firstPlayer.getName() + "'s Turn");
 		firstPlayer.makeMove();
+		firstPlayer.makeMove();
+		firstPlayer.makeMove();
+		
+		firstPlayer.removeTileTest();
 		
 		System.out.println("Second Player " + secondPlayer.getName() + "'s Turn");
 		secondPlayer.makeMove();
@@ -76,4 +86,5 @@ public class Game
 		// else
 		// System.out.println(("It's a Draw!"));
 	}// end play
+	
 }// end Game - class

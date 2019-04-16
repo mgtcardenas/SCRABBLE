@@ -3,8 +3,7 @@ import java.util.Stack;
 /**
  * @author Marco Cárdenas
  *
- *          The Caretaker is an object that holds all the Memento objects on a stack.
- *          The 
+ *         The Caretaker is an object that holds all the Memento objects on a stack.
  */
 public class Caretaker
 {
@@ -13,7 +12,7 @@ public class Caretaker
 	public static void keep(Player originator)
 	{
 		stack.push(originator.createMemento());
-	}// end start
+	}// end keep
 	
 	public static void undo(Player originator)
 	{
