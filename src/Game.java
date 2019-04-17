@@ -64,6 +64,9 @@ public class Game
 		firstPlayer.refillTiles();
 		secondPlayer.refillTiles();
 		
+		// TODO: Make a method to display the board
+		// TODO: Write the method to see if a word is valid
+		
 		System.out.println("First Player " + firstPlayer.getName() + "'s Turn");
 		firstPlayer.makeMove();
 		

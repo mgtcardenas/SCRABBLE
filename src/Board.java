@@ -31,7 +31,7 @@ public class Board
 		// Fill the board with simple grid spaces
 		for (int i = 0; i < 15; i++)
 			for (int j = 0; j < 15; j++)
-				this.grid[i][j] = new GridSpace("simple");
+				this.grid[i][j] = new GridSpace("simple", i, j);
 			
 		addDoubleLetterSpaces();
 		addTripleLetterSpaces();
@@ -45,13 +45,13 @@ public class Board
 	 */
 	private void addDoubleLetterSpaces()
 	{
-		addSymmetric(0, 3, new GridSpace("double-letter"));
-		addSymmetric(2, 6, new GridSpace("double-letter"));
-		addSymmetric(3, 0, new GridSpace("double-letter"));
-		addSymmetric(3, 7, new GridSpace("double-letter"));
-		addSymmetric(6, 2, new GridSpace("double-letter"));
-		addSymmetric(6, 6, new GridSpace("double-letter"));
-		addSymmetric(7, 3, new GridSpace("double-letter"));
+		addSymmetric(0, 3, "double-letter");
+		addSymmetric(2, 6, "double-letter");
+		addSymmetric(3, 0, "double-letter");
+		addSymmetric(3, 7, "double-letter");
+		addSymmetric(6, 2, "double-letter");
+		addSymmetric(6, 6, "double-letter");
+		addSymmetric(7, 3, "double-letter");
 	}// end addDoubleLetterSpaces
 	
 	/**
@@ -60,9 +60,9 @@ public class Board
 	 */
 	private void addTripleLetterSpaces()
 	{
-		addSymmetric(1, 5, new GridSpace("triple-letter"));
-		addSymmetric(5, 1, new GridSpace("triple-letter"));
-		addSymmetric(5, 5, new GridSpace("triple-letter"));
+		addSymmetric(1, 5, "triple-letter");
+		addSymmetric(5, 1, "triple-letter");
+		addSymmetric(5, 5, "triple-letter");
 	}// end addTripleLetterSpaces
 	
 	/**
@@ -71,12 +71,12 @@ public class Board
 	 */
 	private void addDoubleWordSpaces()
 	{
-		this.grid[7][7] = new GridSpace("double-word");
+		this.grid[7][7] = new GridSpace("double-word", 7, 7);
 		
-		addSymmetric(1, 1, new GridSpace("double-word"));
-		addSymmetric(2, 2, new GridSpace("double-word"));
-		addSymmetric(3, 3, new GridSpace("double-word"));
-		addSymmetric(4, 4, new GridSpace("double-word"));
+		addSymmetric(1, 1, "double-word");
+		addSymmetric(2, 2, "double-word");
+		addSymmetric(3, 3, "double-word");
+		addSymmetric(4, 4, "double-word");
 	}// end addDoubleWordSpaces
 	
 	/**
@@ -85,9 +85,9 @@ public class Board
 	 */
 	private void addTripleWordSpaces()
 	{
-		addSymmetric(0, 0, new GridSpace("triple-word"));
-		addSymmetric(0, 7, new GridSpace("triple-word"));
-		addSymmetric(7, 0, new GridSpace("triple-word"));
+		addSymmetric(0, 0, "triple-word");
+		addSymmetric(0, 7, "triple-word");
+		addSymmetric(7, 0, "triple-word");
 	}// end addTripleWordSpaces
 	
 	/**
@@ -95,16 +95,16 @@ public class Board
 	 * the 'x' axis, it's symmetric coordinates respecting the 'y' axis and it's symmetric coordinates
 	 * respecting the origin/center
 	 *
-	 * @param x         the x coordinate
-	 * @param y         the y coordinate
-	 * @param gridSpace the grid space to be inserted
+	 * @param x    the x coordinate
+	 * @param y    the y coordinate
+	 * @param type the type of grid space to be inserted
 	 */
-	private void addSymmetric(int x, int y, GridSpace gridSpace)
+	private void addSymmetric(int x, int y, String type)
 	{
-		this.grid[x][y]				= gridSpace;
-		this.grid[14 - x][y]		= gridSpace; // the symmetric respecting the 'y' axis
-		this.grid[x][14 - y]		= gridSpace; // the symmetric respecting the 'x' axis
-		this.grid[14 - x][14 - y]	= gridSpace; // the symmetric respecting the origin/center axis
+		this.grid[x][y]				= new GridSpace(type, x, y);
+		this.grid[14 - x][y]		= new GridSpace(type, 14 - x, y);        // the symmetric respecting the 'y' axis
+		this.grid[x][14 - y]		= new GridSpace(type, x, 14 - y);        // the symmetric respecting the 'x' axis
+		this.grid[14 - x][14 - y]	= new GridSpace(type, 14 - x, 14 - y);// the symmetric respecting the origin/center axis
 	}// end addSymmetric
 	
 	/**
