@@ -13,7 +13,8 @@ public class Player
 	private String		name;
 	private int			score;
 	private List<Tile>	tiles;
-	//TODO: Add a playedTiles attribute
+	private List<Tile>	playedTiles;
+	// TODO: Add a playedTiles attribute
 	
 	/**
 	 * When we create a new player, his/her score is 0
@@ -21,9 +22,10 @@ public class Player
 	 */
 	public Player(String name)
 	{
-		this.name	= name;
-		this.score	= 0;
-		this.tiles	= new LinkedList<>();
+		this.name			= name;
+		this.score			= 0;
+		this.tiles			= new LinkedList<>();
+		this.playedTiles	= new LinkedList<>();
 	}// end Player - constructor
 	
 	// region Getters & Setters
@@ -46,6 +48,11 @@ public class Player
 	{
 		return tiles;
 	}// end getTiles
+	
+	public List<Tile> getPlayedTiles()
+	{
+		return playedTiles;
+	}// end getPlayedTiles
 		// endregion Getters & Setters
 	
 	/**
@@ -100,18 +107,18 @@ public class Player
 		boolean	madeMove	= false;
 		Scanner	sc			= new Scanner(System.in);
 		
-		System.out.println("What would you like to do " + this.getName() + " ?");
-		System.out.println("1 -> Place Word");
-		System.out.println("2 -> Retake Tiles");
-		System.out.println("3 -> Pass");
-		
 		do
 		{
+			System.out.println("What would you like to do " + this.getName() + " ?");
+			System.out.println("1 -> Place Word, 2 -> Retake Tiles, 3 -> Pass");
+			System.out.print("Your tiles are -> ");
+			for (Tile t : this.tiles)
+				System.out.print(t.getLetter() + "-" + t.getValue() + " ");
+			
 			switch (sc.nextInt())
 			{
 				case 1:
-					placeTile();
-					madeMove = true;
+					madeMove = placeWord(); // placeWord return boolean if indeed the player tried to place a word
 					break;
 				
 				case 2:
@@ -125,9 +132,7 @@ public class Player
 					break;
 				
 				default:
-					System.out.println("Please make a move, your tiles are...");
-					for (Tile t : this.tiles)
-						System.out.print(t.getLetter() + "-" + t.getValue() + " ");
+					System.out.println("Please make a move");
 					break;
 			}// end switch
 		}while (!madeMove); // end do-while
@@ -141,24 +146,21 @@ public class Player
 	 */
 	private boolean placeWord()
 	{
-		int		option		= 0;
 		boolean	madeMove	= false;
 		boolean	placedWord	= false;
 		Scanner	sc			= new Scanner(System.in);
-		
-		System.out.println("What would you like to do " + this.getName() + " ?");
-		System.out.println("1 -> Place Tile");
-		System.out.println("2 -> Confirm");
-		System.out.println("3 -> Cancel");
-		System.out.println("4 -> Exit");
 		
 		Caretaker.keep(this);
 		
 		do
 		{
-			option = sc.nextInt();
+			System.out.println("What would you like to do " + this.getName() + " ?");
+			System.out.println("1. Place Tile, 2. Confirm, 3. Cancel, 4. Exit");
+			System.out.print("Your tiles are -> ");
+			for (Tile t : this.tiles)
+				System.out.print(t.getLetter() + "-" + t.getValue() + " ");
 			
-			switch (option)
+			switch (sc.nextInt())
 			{
 				case 1:
 					placeTile();
@@ -173,17 +175,17 @@ public class Player
 					break;
 				
 				case 3:
-					Caretaker.undo(this);
+					Caretaker.undo(this); // We undo the changes
+					Caretaker.keep(this); // We prepare if the user makes another cancel
 					break;
 				
 				case 4:
+					Caretaker.undo(this);
 					madeMove = true;
 					break;
 				
 				default:
-					System.out.println("Please make a move, your tiles are...");
-					for (Tile t : this.tiles)
-						System.out.print(t.getLetter() + "-" + t.getValue() + " ");
+					System.out.println("Please make a move");
 					break;
 			}// end switch
 		}while (!madeMove); // end do-while
@@ -198,17 +200,25 @@ public class Player
 	{
 		int		x, y, index;
 		
+		// TODO: Put security so if the user makes a mistake, the game keeps running
 		Scanner	sc	= new Scanner(System.in);
 		System.out.println("Give me the coordinates...");
-		System.out.println("X: ");
+		System.out.print("X: ");
 		x = sc.nextInt();
-		System.out.println("Y: ");
+		System.out.print("Y: ");
 		y = sc.nextInt();
-		System.out.println("Which letter do you want to put there?");
+		System.out.print("Which letter do you want to put there? (Give Index)");
 		index = sc.nextInt();
 		
+		// Associate the Tile with the GridSpace and Viceversa
 		this.tiles.get(index).setGridSpace(Board.instance().getGrid()[x][y]);
 		Board.instance().getGrid()[x][y].setTile(this.tiles.get(index));
+		
+		System.out.println("The Tile " + this.tiles.get(index).getLetter() + " was put in " + x + "," + y);
+		
+		// Remove the Tile from the players tiles and put it in it's played tiles
+		this.playedTiles.add(this.tiles.get(index));
+		this.tiles.remove(index);
 	}// end placeTile
 	
 	/**
@@ -235,7 +245,6 @@ public class Player
 		System.out.println(this.getName() + " passed");
 	}// end pass
 	
-	//TODO: Change this so a memento is created with the tiles and the playedTiles
 	/**
 	 * Creates a Memento object with the current titles of the player
 	 * 
@@ -243,7 +252,7 @@ public class Player
 	 */
 	public Memento createMemento()
 	{
-		return new Memento(this.tiles);
+		return new Memento((LinkedList<Tile>) ((LinkedList<Tile>) this.tiles).clone()); // Gives a copy of the Linked List
 	}// end createMemento
 	
 	/**
@@ -253,17 +262,13 @@ public class Player
 	 */
 	public void setMemento(Memento memento)
 	{
-		// TODO: Make this also put away the tiles from the board or something
+		for (int i = this.playedTiles.size() - 1; i >= 0; i--)
+		{
+			this.playedTiles.get(i).getGridSpace().setTile(null); // Dissociate the GridSpace with the Tile
+			this.playedTiles.get(i).setGridSpace(null);           // Dissociate the Tile with the GridSpace
+			this.playedTiles.remove(i);
+		}// end for - i
+		
 		this.tiles = memento.getState();
 	}// end setMemento
-	
-	/**
-	 * Just a simple test to see if I can go about removing the tiles by knowing their coordinates
-	 */
-	public void removeTileTest()
-	{
-		this.tiles.get(0).getGridSpace().setTile(null);
-		this.tiles.get(0).setGridSpace(null);
-		// Board.instance().getGrid()[0][0].setTile(null);
-	}// end removeTileTest
 }// end Player - class

@@ -1,8 +1,14 @@
+/**
+ * @author Marco Cárdenas
+ *
+ *         This class reperesents a Game of Scrabble and is the Controller in this MVC application.
+ *         The rest of the classes form the Model (Player, Bag, Board, Tile, GridSpace, etc.)
+ */
 public class Game
 {
-	Player	firstPlayer, secondPlayer;
-	Board	board;
-	Bag		bag;
+	private Player	firstPlayer, secondPlayer;
+	private Board	board;
+	private Bag		bag;
 	
 	public Game()
 	{
@@ -60,10 +66,6 @@ public class Game
 		
 		System.out.println("First Player " + firstPlayer.getName() + "'s Turn");
 		firstPlayer.makeMove();
-		firstPlayer.makeMove();
-		firstPlayer.makeMove();
-		
-		firstPlayer.removeTileTest();
 		
 		System.out.println("Second Player " + secondPlayer.getName() + "'s Turn");
 		secondPlayer.makeMove();
@@ -86,5 +88,4 @@ public class Game
 		// else
 		// System.out.println(("It's a Draw!"));
 	}// end play
-	
 }// end Game - class
