@@ -153,9 +153,9 @@ public class Player
 		
 		do
 		{
-			System.out.println("What would you like to do " + this.getName() + " ?");
-			System.out.println("1. Place Tile, 2. Confirm, 3. Cancel, 4. Exit");
-			System.out.print("Your tiles are -> ");
+			System.out.println("What would you like to do, " + this.getName() + " ?");
+			System.out.println("(1) Place Tile      (2) Confirm     (3) Cancel      (4) Exit");
+			System.out.print("Your tiles are    ");
 			for (Tile t : this.tiles)
 				System.out.print(t.getLetter() + "-" + t.getValue() + " ");
 			
@@ -167,7 +167,10 @@ public class Player
 				
 				case 2:
 					if (isValidWord())
-						calculateWordScore(getWordTiles());
+					{
+						this.score			+= calculateWordScore(getWordTiles());
+						this.playedTiles	= new LinkedList<>(); // The played tiles were used
+					}
 					else
 						Caretaker.undo(this);
 					
@@ -208,7 +211,7 @@ public class Player
 		x = sc.nextInt();
 		System.out.print("Y: ");
 		y = sc.nextInt();
-		System.out.print("Which letter do you want to put there? (Give Index)");
+		System.out.print("Which letter do you want to put there? (Give Index): ");
 		index = sc.nextInt();
 		
 		// TODO: Add security for when the tile was already used!
@@ -229,60 +232,44 @@ public class Player
 	 */
 	private boolean isValidWord()
 	{
-		int		orientation;
-		String	word;
-		
-		if (playedTiles.size() == 0) // There are no played tiles
+		if (playedTiles.size() == 0) // There are no played Tiles
 			return false;
 		
-		orientation = anyPlayedTileIsConnected();
-		
-		if (orientation == -1)
+		if (!anyPlayedTileIsConnected()) // The played Tiles are not connected to a valid played word
 			return false;
 		
-		if (!allPlayedTilesAreAligned(orientation))
+		if (!allPlayedTilesAreAligned()) // Not all the played Tiles are vertical or horizontal with one another
 			return false;
 		
-		word = getWord(orientation);
-		
-		return Dictionary.wordExists(word); // The last test
+		return Dictionary.wordExists(getWord()); // The formed word does not exist
 	}// end isValidWord
 	
 	/**
 	 * It returns a string constructed from the chars of all the Tiles aligned with the recently played Tiles.
 	 * It must only be used when we are sure all the played tiles are aligned with one another.
 	 * 
-	 * @param  orientation whether the word is set vertical or horizontal
-	 * @return             the formed word as a String object
+	 * @return the formed word as a String object
 	 */
-	private String getWord(int orientation)
+	private String getWord()
 	{
 		char[]	wordChars;
 		int		beginning, end, height;
 		Tile	tile;
-		String	word;
 		
-		word	= "";
-		tile	= this.playedTiles.get(0);
+		tile		= this.playedTiles.get(0);
 		
-		if (orientation == 0) // horizontal, the y coordinate will be the same for all tiles
+		// horizontal, the y coordinate will be the same for all tiles
+		height		= tile.getGridSpace().getyCoordinate();
+		beginning	= tile.getGridSpace().getxCoordinate();
+		end			= tile.getGridSpace().getxCoordinate();
+		while (beginning >= 1 && Board.instance().getGrid()[height][beginning - 1].getTile() != null)
+			beginning--;
+		while (end <= 13 && Board.instance().getGrid()[height][end + 1].getTile() != null)
+			end++;
+		
+		if (beginning == end) // It was not horizontal
 		{
-			height		= tile.getGridSpace().getyCoordinate();
-			beginning	= tile.getGridSpace().getxCoordinate();
-			end			= tile.getGridSpace().getxCoordinate();
-			while (beginning >= 1 && Board.instance().getGrid()[height][beginning - 1].getTile() != null)
-				beginning--;
-			while (end <= 13 && Board.instance().getGrid()[height][end + 1].getTile() != null)
-				end++;
-			
-			wordChars = new char[end - beginning + 1]; // end - beginning + 1 -> number of letters in the word
-			for (int i = 0, x = beginning; x <= end; i++, x++)
-				wordChars[i] = Board.instance().getGrid()[height][x].getTile().getLetter();
-			
-			word = new String(wordChars);
-		}
-		else if (orientation == 1) // vertical, the x coordinate will be the same for all tiles
-		{
+			// vertical, the x coordinate will be the same for all tiles
 			height		= tile.getGridSpace().getxCoordinate();
 			beginning	= tile.getGridSpace().getyCoordinate();
 			end			= tile.getGridSpace().getyCoordinate();
@@ -292,13 +279,17 @@ public class Player
 				end++;
 			
 			wordChars = new char[end - beginning + 1]; // end - beginning + 1 -> number of letters in the word
+			for (int i = 0, y = beginning; y <= end; i++, y++)
+				wordChars[i] = Board.instance().getGrid()[y][height].getTile().getLetter();
+		}
+		else // It was horizontal
+		{
+			wordChars = new char[end - beginning + 1]; // end - beginning + 1 -> number of letters in the word
 			for (int i = 0, x = beginning; x <= end; i++, x++)
 				wordChars[i] = Board.instance().getGrid()[height][x].getTile().getLetter();
-			
-			word = new String(wordChars);
 		}// end if - else
 		
-		return word;
+		return new String(wordChars);
 	}// end getWord
 	
 	/**
@@ -309,31 +300,24 @@ public class Player
 	 */
 	private Tile[] getWordTiles()
 	{
-		int		orientation;
 		int		beginning, end, height;
 		Tile	tile;
 		Tile[]	wordTiles;
 		
-		orientation	= anyPlayedTileIsConnected();
-		wordTiles	= null;
 		tile		= this.playedTiles.get(0);
 		
-		if (orientation == 0) // horizontal, the y coordinate will be the same for all tiles
+		// horizontal, the y coordinate will be the same for all tiles
+		height		= tile.getGridSpace().getyCoordinate();
+		beginning	= tile.getGridSpace().getxCoordinate();
+		end			= tile.getGridSpace().getxCoordinate();
+		while (beginning >= 1 && Board.instance().getGrid()[height][beginning - 1].getTile() != null)
+			beginning--;
+		while (end <= 13 && Board.instance().getGrid()[height][end + 1].getTile() != null)
+			end++;
+		
+		if (beginning == end) // It was not horizontal
 		{
-			height		= tile.getGridSpace().getyCoordinate();
-			beginning	= tile.getGridSpace().getxCoordinate();
-			end			= tile.getGridSpace().getxCoordinate();
-			while (beginning >= 1 && Board.instance().getGrid()[height][beginning - 1].getTile() != null)
-				beginning--;
-			while (end <= 13 && Board.instance().getGrid()[height][end + 1].getTile() != null)
-				end++;
-			
-			wordTiles = new Tile[end - beginning + 1]; // end - beginning + 1 -> number of letters in the word
-			for (int i = 0, x = beginning; x <= end; i++, x++)
-				wordTiles[i] = Board.instance().getGrid()[height][x].getTile();
-		}
-		else if (orientation == 1) // vertical, the x coordinate will be the same for all tiles
-		{
+			// vertical, the x coordinate will be the same for all tiles
 			height		= tile.getGridSpace().getxCoordinate();
 			beginning	= tile.getGridSpace().getyCoordinate();
 			end			= tile.getGridSpace().getyCoordinate();
@@ -342,6 +326,12 @@ public class Player
 			while (end <= 13 && Board.instance().getGrid()[end + 1][height].getTile() != null)
 				end++;
 			
+			wordTiles = new Tile[end - beginning + 1]; // end - beginning + 1 -> number of letters in the word
+			for (int i = 0, y = beginning; y <= end; i++, y++)
+				wordTiles[i] = Board.instance().getGrid()[y][height].getTile();
+		}
+		else // It was horizontal
+		{
 			wordTiles = new Tile[end - beginning + 1]; // end - beginning + 1 -> number of letters in the word
 			for (int i = 0, x = beginning; x <= end; i++, x++)
 				wordTiles[i] = Board.instance().getGrid()[height][x].getTile();
@@ -352,77 +342,104 @@ public class Player
 	
 	/**
 	 * This function determines whether any of the recently played tiles is connected to a word that
-	 * was already played on the board or to the center of the board.
+	 * was already played on the board or was played on the center of the board.
 	 *
-	 * @return -1 if no tile is connected / 0 if the orientation is horizontal / 1 if the orientation is vertical
+	 * @return true if any played tile is connected / false no played tile is connected
 	 */
-	private int anyPlayedTileIsConnected()
+	private boolean anyPlayedTileIsConnected()
 	{
-		int x, y, orientation;
-		
-		orientation = -1;
+		int x, y;
 		
 		for (Tile t : playedTiles)
 		{
-			if (t.getGridSpace().getxCoordinate() == 7 && t.getGridSpace().getyCoordinate() == 7)
-				orientation = 0;
-			
 			x	= t.getGridSpace().getxCoordinate();
 			y	= t.getGridSpace().getyCoordinate();
 			
+			if (x == 7 && y == 7)
+				return true;
+			
 			if (Board.instance().getGrid()[y][(x == 14) ? x - 1 : x + 1].wasUsed()) // The word is connected right
-				orientation = 0;
+				return true;
 			
 			if (Board.instance().getGrid()[y][Math.abs(x - 1)].wasUsed())           // The word is connected left
-				orientation = 0;
+				return true;
 			
 			if (Board.instance().getGrid()[Math.abs(y - 1)][x].wasUsed())           // The word is connected up
-				orientation = 1;
+				return true;
 			
 			if (Board.instance().getGrid()[(y == 14) ? y - 1 : y + 1][x].wasUsed()) // The word is connected down
-				orientation = 1;
+				return true;
 		}// end foreach
 		
-		return orientation;
+		return false;
 	}// end anyPlayedTileIsConnected
 	
 	/**
-	 * Determines whether all the played tiles are aligned vertically or horizontally given the orientation
+	 * Determines whether all the played tiles are aligned vertically or horizontally
 	 *
-	 * @param  orientation whether the tiles were played horizontally or vertically
-	 *
-	 * @return             true if the tiles are a aligned / false if they are not aligned
+	 * @return true if the tiles are a aligned / false if they are not aligned
 	 */
-	private boolean allPlayedTilesAreAligned(int orientation)
+	private boolean allPlayedTilesAreAligned()
 	{
-		if (orientation == 0) // horizontal
+		int x, y;
+		
+		y = this.playedTiles.get(0).getGridSpace().getyCoordinate();// Horizontal
+		for (Tile horizontalTile : playedTiles)
 		{
-			int y = this.playedTiles.get(0).getGridSpace().getyCoordinate();
-			for (Tile t : playedTiles)
+			if (horizontalTile.getGridSpace().getyCoordinate() != y) // It is not horizontal
 			{
-				if (t.getGridSpace().getyCoordinate() != y)
-					return false;
-			}// end foreach
-		}
-		else if (orientation == 1) // vertical
-		{
-			int x = this.playedTiles.get(0).getGridSpace().getxCoordinate();
-			for (Tile t : playedTiles)
-			{
-				if (t.getGridSpace().getxCoordinate() != x)
-					return false;
-			}// end foreach
-		}// end if - else
+				
+				x = this.playedTiles.get(0).getGridSpace().getxCoordinate();// Vertical
+				for (Tile verticalTile : playedTiles)
+				{
+					if (verticalTile.getGridSpace().getxCoordinate() != x) // It is neither vertical
+						return false;
+				}// end foreach
+				
+				break;
+			}// end if
+		}// end foreach
 		
 		return true;
 	}// end allPlayedTilesAreAligned
 	
 	/**
-	 * Method that uses an Adder and a Counter classes that implement the Bridge software design pattern
+	 * Method that uses an Adder and a Multiplier classes that implement the Bridge software design pattern
+	 *
+	 * @return the score for playing the most recent word
 	 */
-	private void calculateWordScore(Tile[] wordTiles)
+	private int calculateWordScore(Tile[] wordTiles)
 	{
-		this.score += 50;
+		int					sum;
+		AbstractAdder		adder;
+		AbstractMultiplier	multiplier;
+		String				highestBonus;
+		String				currentBonus;
+		
+		sum = 0;
+		
+		for (Tile t : wordTiles)
+		{
+			adder	= new Adder(t.getGridSpace().wasUsed() ? "simple" : t.getGridSpace().getType());
+			sum		= adder.add(t);
+		}// end foreach
+		
+		highestBonus = "simple";
+		
+		for (Tile t : wordTiles)
+		{
+			if (t.getGridSpace().getType().contains("word"))
+			{
+				currentBonus	= t.getGridSpace().getType();
+				highestBonus	= (highestBonus.compareTo(currentBonus) < 0) ? currentBonus : highestBonus;
+			}// end if
+			
+			t.getGridSpace().setUsed(true);
+		}// end foreach
+		
+		multiplier = new Multiplier(highestBonus);
+		
+		return multiplier.multiply(sum);
 	}// end calculateWordScore
 	
 	/**

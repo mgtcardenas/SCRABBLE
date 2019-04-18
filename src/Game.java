@@ -65,29 +65,26 @@ public class Game
 		secondPlayer.refillTiles();
 		
 		// TODO: Make a method to display the board
+		do
+		{
+			System.out.println("First Player " + firstPlayer.getName() + "'s Turn");
+			firstPlayer.makeMove();
+			firstPlayer.refillTiles();
+			
+			System.out.println("Second Player " + secondPlayer.getName() + "'s Turn");
+			secondPlayer.makeMove();
+			secondPlayer.refillTiles();
+		}while (!bag.isEmpty()); // end do-while
 		
-		System.out.println("First Player " + firstPlayer.getName() + "'s Turn");
+		// Final Round
 		firstPlayer.makeMove();
-		
-		System.out.println("Second Player " + secondPlayer.getName() + "'s Turn");
 		secondPlayer.makeMove();
-		// do
-		// {
-		// System.out.println("First Player's Turn");
-		// firstPlayer.makeMove();
-		// System.out.println("Second Player's Turn");
-		// secondPlayer.makeMove();
-		// }while (!bag.isEmpty()); // end do-while
-		//
-		// // Final Round
-		// firstPlayer.makeMove();
-		// secondPlayer.makeMove();
-		//
-		// if (firstPlayer.getScore() > secondPlayer.getScore())
-		// System.out.println(("The First Player Won!"));
-		// else if (firstPlayer.getScore() < secondPlayer.getScore())
-		// System.out.println(("The Second Player Won!"));
-		// else
-		// System.out.println(("It's a Draw!"));
+		
+		if (firstPlayer.getScore() > secondPlayer.getScore())
+			System.out.println(("The First Player Won!"));
+		else if (firstPlayer.getScore() < secondPlayer.getScore())
+			System.out.println(("The Second Player Won!"));
+		else
+			System.out.println(("It's a Draw!"));
 	}// end play
 }// end Game - class

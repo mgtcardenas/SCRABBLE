@@ -10,5 +10,5 @@ public abstract class Abstraction
 	public void operation()
 	{
 		imp.operationImp();
-	}// end operation
+	}// end add
 }// end Abstraction - class

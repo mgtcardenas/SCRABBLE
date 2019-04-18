@@ -6,7 +6,7 @@ public class Main
 		scrabble.play();
 		System.out.println("Just to make a point");
 		
-		// String result = (Dictionary.wordExists("RUN")) ? "TRUE" : "FALSE";
+		// String result = (Dictionary.wordExists("TOE")) ? "TRUE" : "FALSE";
 		//
 		// System.out.println(result);
 	}// end main

@@ -18,6 +18,7 @@ public class Dictionary
 	 */
 	public static boolean wordExists(String word)
 	{
+		// TODO: What if the word contains '_'? We should try with all the letters and check whether it exists, if it exists we should replace it with the same function
 		try
 		{
 			File			file	= new File(DICTIONARY_PATH);
