@@ -1,6 +1,9 @@
 This source code implements my version of the Scrabble table top game, since not all the rules of that game are
 strictly followed. This game can only be played by two players.
 
+The dictionary comes from a text file of twenty thousand common english words
+that can be found at: https://github.com/first20hours/google-10000-english/blob/master/20k.txt
+
 Some of the most notable differences are...
 
 1. This game can only be played by two players (not one player, nor 3, nor 4)
