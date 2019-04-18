@@ -109,7 +109,7 @@ public class Player
 		do
 		{
 			System.out.println("What would you like to do " + this.getName() + " ?");
-			System.out.println("1 -> Place Word, 2 -> Retake Tiles, 3 -> Pass");
+			System.out.println("(1) Place Word    (2) Retake Tiles    (3) Pass");
 			System.out.print("Your tiles are -> ");
 			for (Tile t : this.tiles)
 				System.out.print(t.getLetter() + "-" + t.getValue() + " ");
@@ -154,7 +154,7 @@ public class Player
 		do
 		{
 			System.out.println("What would you like to do, " + this.getName() + " ?");
-			System.out.println("(1) Place Tile      (2) Confirm     (3) Cancel      (4) Exit");
+			System.out.println("(1) Place Tile    (2) Confirm    (3) Cancel    (4) Exit");
 			System.out.print("Your tiles are    ");
 			for (Tile t : this.tiles)
 				System.out.print(t.getLetter() + "-" + t.getValue() + " ");
@@ -421,16 +421,17 @@ public class Player
 		for (Tile t : wordTiles)
 		{
 			adder	= new Adder(t.getGridSpace().wasUsed() ? "simple" : t.getGridSpace().getType());
-			sum		= adder.add(t);
+			sum		+= adder.add(t);
 		}// end foreach
 		
 		highestBonus = "simple";
 		
 		for (Tile t : wordTiles)
 		{
-			if (t.getGridSpace().getType().contains("word"))
+			if (t.getGridSpace().getType().contains("word") && !t.getGridSpace().wasUsed())
 			{
 				currentBonus	= t.getGridSpace().getType();
+				highestBonus	= highestBonus.equals("simple") ? currentBonus : highestBonus;
 				highestBonus	= (highestBonus.compareTo(currentBonus) < 0) ? currentBonus : highestBonus;
 			}// end if
 			
