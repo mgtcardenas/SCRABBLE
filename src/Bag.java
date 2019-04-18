@@ -32,7 +32,7 @@ public class Bag
 		this.missingTiles	= new LinkedList<>();
 		this.tiles			= new LinkedList<>();
 		// Add Wildcards Worth 0 Points
-		// addTiles(2, '_', 0); (Intentionally Left Out)
+		addTiles(2, '_', 0);
 		// Add Letters worth 1 Point
 		addTiles(12, 'E', 1);
 		addTiles(9, 'A', 1);
