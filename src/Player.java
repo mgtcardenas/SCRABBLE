@@ -65,7 +65,7 @@ public class Player
 	
 	/**
 	 * Makes the player return all of his/her tiles to the bag
-	 * 
+	 *
 	 * @throws Exception if somehow the player wants to return a tile that is not missing from the bag
 	 */
 	public void returnTiles() throws Exception
@@ -167,7 +167,7 @@ public class Player
 				
 				case 2:
 					if (isValidWord())
-						calculateWordScore();
+						calculateWordScore(getWordTiles());
 					else
 						Caretaker.undo(this);
 					
@@ -230,11 +230,6 @@ public class Player
 	private boolean isValidWord()
 	{
 		int		orientation;
-		int		beginning;
-		int		end;
-		int		height;
-		Tile[]	wordTiles;
-		char[]	wordChars;
 		String	word;
 		
 		if (playedTiles.size() == 0) // There are no played tiles
@@ -248,33 +243,117 @@ public class Player
 		if (!allPlayedTilesAreAligned(orientation))
 			return false;
 		
-		// TODO: Get the word
-		Tile tile = this.playedTiles.get(0);
+		word = getWord(orientation);
+		
+		return Dictionary.wordExists(word); // The last test
+	}// end isValidWord
+	
+	/**
+	 * It returns a string constructed from the chars of all the Tiles aligned with the recently played Tiles.
+	 * It must only be used when we are sure all the played tiles are aligned with one another.
+	 * 
+	 * @param  orientation whether the word is set vertical or horizontal
+	 * @return             the formed word as a String object
+	 */
+	private String getWord(int orientation)
+	{
+		char[]	wordChars;
+		int		beginning, end, height;
+		Tile	tile;
+		String	word;
+		
+		word	= "";
+		tile	= this.playedTiles.get(0);
+		
 		if (orientation == 0) // horizontal, the y coordinate will be the same for all tiles
 		{
 			height		= tile.getGridSpace().getyCoordinate();
 			beginning	= tile.getGridSpace().getxCoordinate();
-			// TE QUEDASTE AQUÍ!!!
+			end			= tile.getGridSpace().getxCoordinate();
+			while (beginning >= 1 && Board.instance().getGrid()[height][beginning - 1].getTile() != null)
+				beginning--;
+			while (end <= 13 && Board.instance().getGrid()[height][end + 1].getTile() != null)
+				end++;
+			
+			wordChars = new char[end - beginning + 1]; // end - beginning + 1 -> number of letters in the word
+			for (int i = 0, x = beginning; x <= end; i++, x++)
+				wordChars[i] = Board.instance().getGrid()[height][x].getTile().getLetter();
+			
+			word = new String(wordChars);
 		}
 		else if (orientation == 1) // vertical, the x coordinate will be the same for all tiles
 		{
 			height		= tile.getGridSpace().getxCoordinate();
 			beginning	= tile.getGridSpace().getyCoordinate();
+			end			= tile.getGridSpace().getyCoordinate();
+			while (beginning >= 1 && Board.instance().getGrid()[beginning - 1][height].getTile() != null)
+				beginning--;
+			while (end <= 13 && Board.instance().getGrid()[end + 1][height].getTile() != null)
+				end++;
+			
+			wordChars = new char[end - beginning + 1]; // end - beginning + 1 -> number of letters in the word
+			for (int i = 0, x = beginning; x <= end; i++, x++)
+				wordChars[i] = Board.instance().getGrid()[height][x].getTile().getLetter();
+			
+			word = new String(wordChars);
 		}// end if - else
 		
-		// TODO: Check if the word is in the dictionary
-		/*
-		 * 1. Get the first tile in the played tiles to get the y coordinate (which will be the same)
-		 * 2. If the orientation is horizontal, move to the left until i == 0 or
-		 */
+		return word;
+	}// end getWord
+	
+	/**
+	 * Gets the tiles of the recently played word. These are probably more than just the played tiles, thus the importance
+	 * of this function
+	 * 
+	 * @return an array of Tile objects ordered
+	 */
+	private Tile[] getWordTiles()
+	{
+		int		orientation;
+		int		beginning, end, height;
+		Tile	tile;
+		Tile[]	wordTiles;
 		
-		return true;
-	}// end isValidWord
+		orientation	= anyPlayedTileIsConnected();
+		wordTiles	= null;
+		tile		= this.playedTiles.get(0);
+		
+		if (orientation == 0) // horizontal, the y coordinate will be the same for all tiles
+		{
+			height		= tile.getGridSpace().getyCoordinate();
+			beginning	= tile.getGridSpace().getxCoordinate();
+			end			= tile.getGridSpace().getxCoordinate();
+			while (beginning >= 1 && Board.instance().getGrid()[height][beginning - 1].getTile() != null)
+				beginning--;
+			while (end <= 13 && Board.instance().getGrid()[height][end + 1].getTile() != null)
+				end++;
+			
+			wordTiles = new Tile[end - beginning + 1]; // end - beginning + 1 -> number of letters in the word
+			for (int i = 0, x = beginning; x <= end; i++, x++)
+				wordTiles[i] = Board.instance().getGrid()[height][x].getTile();
+		}
+		else if (orientation == 1) // vertical, the x coordinate will be the same for all tiles
+		{
+			height		= tile.getGridSpace().getxCoordinate();
+			beginning	= tile.getGridSpace().getyCoordinate();
+			end			= tile.getGridSpace().getyCoordinate();
+			while (beginning >= 1 && Board.instance().getGrid()[beginning - 1][height].getTile() != null)
+				beginning--;
+			while (end <= 13 && Board.instance().getGrid()[end + 1][height].getTile() != null)
+				end++;
+			
+			wordTiles = new Tile[end - beginning + 1]; // end - beginning + 1 -> number of letters in the word
+			for (int i = 0, x = beginning; x <= end; i++, x++)
+				wordTiles[i] = Board.instance().getGrid()[height][x].getTile();
+		}// end if - else
+		
+		return wordTiles;
+	}// end getWordTiles
 	
 	/**
 	 * This function determines whether any of the recently played tiles is connected to a word that
 	 * was already played on the board or to the center of the board.
-	 * 
+	 *
 	 * @return -1 if no tile is connected / 0 if the orientation is horizontal / 1 if the orientation is vertical
 	 */
 	private int anyPlayedTileIsConnected()
@@ -309,8 +388,9 @@ public class Player
 	
 	/**
 	 * Determines whether all the played tiles are aligned vertically or horizontally given the orientation
-	 * 
+	 *
 	 * @param  orientation whether the tiles were played horizontally or vertically
+	 *
 	 * @return             true if the tiles are a aligned / false if they are not aligned
 	 */
 	private boolean allPlayedTilesAreAligned(int orientation)
@@ -340,9 +420,9 @@ public class Player
 	/**
 	 * Method that uses an Adder and a Counter classes that implement the Bridge software design pattern
 	 */
-	private void calculateWordScore()
+	private void calculateWordScore(Tile[] wordTiles)
 	{
-		
+		this.score += 50;
 	}// end calculateWordScore
 	
 	/**
@@ -355,7 +435,7 @@ public class Player
 	
 	/**
 	 * Creates a Memento object with the current titles of the player
-	 * 
+	 *
 	 * @return a new Memento object built from the tiles of the player
 	 */
 	public Memento createMemento()
@@ -365,7 +445,7 @@ public class Player
 	
 	/**
 	 * Sets the state of the tiles based on a memento previously
-	 * 
+	 *
 	 * @param memento the memento with which the state of the tiles is rebuilt
 	 */
 	public void setMemento(Memento memento)
