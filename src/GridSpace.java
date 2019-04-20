@@ -1,20 +1,26 @@
+import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
+
 /**
  * @author Marco Cárdenas
  *
  *         A class that represents each individual space/box on the board.
  *         Each gridspace is of a particular type and has a multiplier
  */
-public class GridSpace
+public class GridSpace extends StackPane
 {
-	private String	type;
-	private boolean	used;
-	private Tile	tile;
-	private int		xCoordinate;
-	private int		yCoordinate;
+	public static final double	GRIDSPACE_SIZE	= 50;
+	private String				type;
+	private boolean				used;
+	private Tile				tile;
+	private int					xCoordinate;
+	private int					yCoordinate;
+	private Rectangle			rectangle;
 	
 	/**
 	 * Class constructor
-	 * 
+	 *
 	 * @param type either "simple", "double-letter", "triple-letter", "double-word" or "triple-word"
 	 * @param y    the row this tile is located at, counting from 0
 	 * @param x    the column this tile is located at, counting from 0
@@ -26,6 +32,43 @@ public class GridSpace
 		this.tile			= null;
 		this.xCoordinate	= x;
 		this.yCoordinate	= y;
+		this.rectangle		= new Rectangle();
+		
+		this.setWidth(GRIDSPACE_SIZE);
+		this.setHeight(GRIDSPACE_SIZE);
+		
+		this.rectangle.setWidth(GRIDSPACE_SIZE);
+		this.rectangle.setHeight(GRIDSPACE_SIZE);
+		
+		switch (this.type)
+		{
+			case "double-letter":
+				this.rectangle.setFill(Color.CYAN);
+				break;
+			
+			case "triple-letter":
+				this.rectangle.setFill(Color.BLUE);
+				break;
+			
+			case "double-word":
+				this.rectangle.setFill(Color.HOTPINK);
+				break;
+			
+			case "triple-word":
+				this.rectangle.setFill(Color.RED);
+				break;
+			
+			default:
+				this.rectangle.setFill(Color.LIMEGREEN);
+				break;
+		}// end switch this.type
+		
+		this.rectangle.xProperty().bind(this.layoutXProperty());
+		this.rectangle.yProperty().bind(this.layoutYProperty());
+		
+		this.rectangle.setStroke(Color.BLACK);
+		
+		getChildren().addAll(this.rectangle);
 	}// end GridSpace - constructor
 	
 	// region Getters & Setters
