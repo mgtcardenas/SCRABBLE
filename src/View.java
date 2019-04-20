@@ -1,24 +1,25 @@
 import java.util.LinkedList;
 import java.util.List;
 
-import javafx.application.Application;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
-import javafx.stage.Stage;
 
-public class View extends Application
+/**
+ * @author Marco Cárdenas
+ *
+ *         The View class which only job is to build the components that the user will see when interacting with the applicaiton
+ */
+public class View extends AnchorPane
 {
-	private static final double	SCENE_WIDTH		= 1500;
-	private static final double	SCENE_HEIGHT	= 900;
-	private static final double	OFFSET			= 15;
+	public static final double	SCENE_WIDTH		= 1500;
+	public static final double	SCENE_HEIGHT	= 900;
+	public static final double	OFFSET			= 15;
 	
-	AnchorPane					root;
-	Scene						scene;
 	Board						board;
 	Bag							bag;
 	
@@ -39,30 +40,18 @@ public class View extends Application
 	Button						cancelWordButton;
 	Button						placeWordButton;
 	
-	public static void main(String[] args)
-	{
-		launch(args);
-	}// end main
+	ToggleButton				toggleVisibleButton;
+	static List<Tile>			currentPlayerTiles;
 	
-	@Override
-	public void start(Stage primaryStage) throws Exception
+	public View() throws Exception
 	{
 		this.board	= Board.instance();
 		this.bag	= Bag.instance();
-		this.root	= buildComponents();
-		this.scene	= new Scene(root, SCENE_WIDTH, SCENE_HEIGHT);
-		setEventHandlers();
-		
-		primaryStage.setTitle("Scrabble");
-		primaryStage.setScene(scene);
-		primaryStage.setResizable(false);
-		primaryStage.show();
-	}// end start
+		buildComponents();
+	}// end View
 	
-	public AnchorPane buildComponents() throws Exception
+	private void buildComponents() throws Exception
 	{
-		this.root					= new AnchorPane();
-		
 		this.playersTurn			= new Label("First Players Turn");
 		this.playersScore			= new Label("Points: ");
 		
@@ -80,11 +69,12 @@ public class View extends Application
 		this.exchangeTilesButton	= new Button("Exchange Tiles");
 		this.cancelWordButton		= new Button("Cancel Word");
 		this.placeWordButton		= new Button("Place Word");
+		this.toggleVisibleButton	= new ToggleButton("Visible Tiles");
 		
-		root.getChildren().addAll(this.playersTurn, this.playersScore);
-		root.getChildren().addAll(this.doubleLetterLegend, this.tripleLetterLegend, this.doubleWordLegend, this.tripleWordLegend);
-		root.getChildren().addAll(this.doubleLetterRectangle, this.tripleLetterRectangle, this.doubleWordRectangle, this.tripleWordRectangle);
-		root.getChildren().addAll(this.passButton, this.exchangeTilesButton, this.cancelWordButton, this.placeWordButton);
+		getChildren().addAll(this.playersTurn, this.playersScore);
+		getChildren().addAll(this.doubleLetterLegend, this.tripleLetterLegend, this.doubleWordLegend, this.tripleWordLegend);
+		getChildren().addAll(this.doubleLetterRectangle, this.tripleLetterRectangle, this.doubleWordRectangle, this.tripleWordRectangle);
+		getChildren().addAll(this.passButton, this.exchangeTilesButton, this.cancelWordButton, this.placeWordButton, this.toggleVisibleButton);
 		
 		// Align Turn & Score
 		AnchorPane.setBottomAnchor(this.playersTurn, GridSpace.GRIDSPACE_SIZE);
@@ -132,6 +122,9 @@ public class View extends Application
 		AnchorPane.setBottomAnchor(this.placeWordButton, GridSpace.GRIDSPACE_SIZE * 9);
 		AnchorPane.setRightAnchor(this.placeWordButton, GridSpace.GRIDSPACE_SIZE * 10 + OFFSET);
 		
+		AnchorPane.setTopAnchor(this.toggleVisibleButton, GridSpace.GRIDSPACE_SIZE * 2);
+		AnchorPane.setRightAnchor(this.toggleVisibleButton, GridSpace.GRIDSPACE_SIZE * 6 + OFFSET);
+		
 		// Draw The Board
 		GridSpace gridSpace;
 		for (int y = 0; y < board.getGrid().length; y++)
@@ -141,51 +134,54 @@ public class View extends Application
 				gridSpace = board.getGrid()[y][x];
 				gridSpace.setLayoutX((x + 1) * GridSpace.GRIDSPACE_SIZE);
 				gridSpace.setLayoutY((y + 1) * GridSpace.GRIDSPACE_SIZE);
-				gridSpace.setOnMouseClicked(e -> System.out.println("Abuelita de Batman"));
-				root.getChildren().addAll(gridSpace);
+				getChildren().add(gridSpace);
 			}// end for - x
 		}// end for - y
 		
-		List<Tile>	tiles	= new LinkedList<>();
-		Tile		tile;
-		for (int i = 0; i < 100; i++)
-		{
-			tile = Bag.instance().takeTile();
-			tile.setEffect(new DropShadow(10, 0f, 0d, Color.DEEPSKYBLUE));
-			tile.setOnMouseClicked(e -> System.out.println("I'm a Tile"));
-			tiles.add(tile);
-		}// end for - i
+		currentPlayerTiles = new LinkedList<>();
 		
-		for (Tile t : tiles)
-			Bag.instance().putTile(t);
-		
-		Player newPlayer = new Player("Marco");
-		newPlayer.refillTiles();
-		for (int i = 0; i < newPlayer.getTiles().size(); i++)
-		{
-			newPlayer.getTiles().get(i).setLayoutX((i + 18) * Tile.TILE_SIZE + i * 30);
-			newPlayer.getTiles().get(i).setLayoutY(3 * Tile.TILE_SIZE);
-			root.getChildren().add(newPlayer.getTiles().get(i));
-		}// end for - i
-		
-		return root;
 	}// end buildComponents
 	
-	public void setEventHandlers()
+	public void setEventHandlersAndActionListeners(Game controller) throws Exception
 	{
-		GridSpace gridSpace;
+		GridSpace gridSpace; // Event Handlers for GridSpaces
 		for (int y = 0; y < board.getGrid().length; y++)
 		{
 			for (int x = 0; x < board.getGrid()[y].length; x++)
 			{
 				gridSpace = board.getGrid()[y][x];
-				gridSpace.setOnMouseClicked(e -> System.out.println(((GridSpace) e.getSource()).getyCoordinate() + ", " + ((GridSpace) e.getSource()).getxCoordinate()));
+				gridSpace.setOnMouseClicked(controller::handleGridSpaceClicks);
 			}// end for - x
 		}// end for - y
 		
-		this.passButton.setOnAction(e -> System.out.println("I pass"));
-		this.exchangeTilesButton.setOnAction(e -> System.out.println("I exchange tiles"));
-		this.cancelWordButton.setOnAction(e -> System.out.println("I cancel"));
-		this.placeWordButton.setOnAction(e -> System.out.println("I place word"));
-	}// end setEventHandlers
+		Tile tile;
+		
+		for (int i = 0; i < 100; i++) // You can't just do this you will eventually try to access
+		{
+			tile = Bag.instance().takeTile();
+			tile.setEffect(new DropShadow(10, 0f, 0d, Color.DEEPSKYBLUE));
+			tile.setOnMouseClicked(e -> System.out.println("I'm a Tile"));
+			currentPlayerTiles.add(tile);
+		}// end for - i
+		
+		for (Tile t : currentPlayerTiles)
+			Bag.instance().putTile(t);
+		
+		// region for method updateView
+		Player newPlayer = new Player("Dummy");
+		newPlayer.refillTiles();
+		for (int i = 0; i < newPlayer.getTiles().size(); i++)
+		{
+			newPlayer.getTiles().get(i).setLayoutX((i + 18) * Tile.TILE_SIZE + i * 30);
+			newPlayer.getTiles().get(i).setLayoutY(3 * Tile.TILE_SIZE);
+			getChildren().add(newPlayer.getTiles().get(i));
+		}// end for - i
+			// endregion for method updateView
+		
+		this.passButton.setOnAction(controller);
+		this.exchangeTilesButton.setOnAction(controller);
+		this.cancelWordButton.setOnAction(controller);
+		this.placeWordButton.setOnAction(controller);
+		this.toggleVisibleButton.selectedProperty().addListener(controller::changed);
+	}// end setEventHandlersAndActionListeners
 }// end View - class
