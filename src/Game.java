@@ -181,13 +181,15 @@ public class Game implements EventHandler<ActionEvent>
 	 */
 	private boolean placedValidWord(Player currentPlayer)
 	{
+		GridSpace connectedGridSpace;
+		
 		if (currentPlayer.getPlayedTiles().size() == 0) // There are no played Tiles
 			return false;
 		
-		if (!anyPlayedTileIsConnected(currentPlayer)) // The played Tiles are not connected to a valid played word
+		if ((connectedGridSpace = anyPlayedTileIsConnected(currentPlayer)) == null) // The played Tiles are not connected to a valid played word
 			return false;
 		
-		if (!allPlayedTilesAreAligned(currentPlayer)) // Not all the played Tiles are vertical or horizontal with one another
+		if (!allPlayedTilesAreAligned(currentPlayer, connectedGridSpace)) // Not all the played Tiles are vertical or horizontal with one another
 			return false;
 		
 		return Dictionary.wordExists(getWord(currentPlayer)); // The formed word does not exist
@@ -298,7 +300,7 @@ public class Game implements EventHandler<ActionEvent>
 	 * @param  currentPlayer the current player who just placed tiles
 	 * @return               true if any played tile is connected / false no played tile is connected
 	 */
-	private boolean anyPlayedTileIsConnected(Player currentPlayer)
+	private GridSpace anyPlayedTileIsConnected(Player currentPlayer)
 	{
 		int x, y;
 		
@@ -308,22 +310,22 @@ public class Game implements EventHandler<ActionEvent>
 			y	= t.getGridSpace().getyCoordinate();
 			
 			if (x == 7 && y == 7)
-				return true;
+				return Board.instance().getGrid()[7][7];
 			
 			if (Board.instance().getGrid()[y][(x == 14) ? x - 1 : x + 1].wasUsed()) // The word is connected right
-				return true;
+				return Board.instance().getGrid()[y][(x == 14) ? x - 1 : x + 1];
 			
 			if (Board.instance().getGrid()[y][Math.abs(x - 1)].wasUsed())           // The word is connected left
-				return true;
+				return Board.instance().getGrid()[y][Math.abs(x - 1)];
 			
 			if (Board.instance().getGrid()[Math.abs(y - 1)][x].wasUsed())           // The word is connected up
-				return true;
+				return Board.instance().getGrid()[Math.abs(y - 1)][x];
 			
 			if (Board.instance().getGrid()[(y == 14) ? y - 1 : y + 1][x].wasUsed()) // The word is connected down
-				return true;
+				return Board.instance().getGrid()[(y == 14) ? y - 1 : y + 1][x];
 		}// end foreach
 		
-		return false;
+		return null;
 	}// end anyPlayedTileIsConnected
 	
 	/**
@@ -332,17 +334,16 @@ public class Game implements EventHandler<ActionEvent>
 	 * @param  currentPlayer the current player who just placed tiles
 	 * @return               true if the tiles are a aligned / false if they are not aligned
 	 */
-	private boolean allPlayedTilesAreAligned(Player currentPlayer)
+	private boolean allPlayedTilesAreAligned(Player currentPlayer, GridSpace connectedGridSpace)
 	{
 		int x, y;
 		
-		y = currentPlayer.getPlayedTiles().get(0).getGridSpace().getyCoordinate();// Horizontal
+		y = connectedGridSpace.getyCoordinate();// Horizontal
 		for (Tile horizontalTile : currentPlayer.getPlayedTiles())
 		{
 			if (horizontalTile.getGridSpace().getyCoordinate() != y) // It is not horizontal
 			{
-				
-				x = currentPlayer.getPlayedTiles().get(0).getGridSpace().getxCoordinate();// Vertical
+				x = connectedGridSpace.getxCoordinate();// Vertical
 				for (Tile verticalTile : currentPlayer.getPlayedTiles())
 					if (verticalTile.getGridSpace().getxCoordinate() != x) // It is neither vertical
 						return false;
