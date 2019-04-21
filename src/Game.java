@@ -1,3 +1,5 @@
+import java.util.LinkedList;
+
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -141,28 +143,242 @@ public class Game implements EventHandler<ActionEvent>
 		alert.showAndWait();
 	}// end alertOrderOfPlayers
 	
-	// TODO: Function that makes click on tile be the selected tile, so also add a selected Tile to the Game
-	public void handleTileClicks(MouseEvent event)
+	/**
+	 * Checks whether the tiles just put in the board form a valid word
+	 */
+	private boolean placedValidWord(Player currentPlayer)
 	{
-		if (selectedTile != null)
-			selectedTile.setEffect(null);
+		if (currentPlayer.getPlayedTiles().size() == 0) // There are no played Tiles
+			return false;
 		
-		selectedTile = ((Tile) event.getSource());
-		selectedTile.setEffect(new DropShadow(10, 0f, 0d, Color.DEEPSKYBLUE));
-		System.out.println(selectedTile);
-	}// end handleTileClicks
+		if (!anyPlayedTileIsConnected(currentPlayer)) // The played Tiles are not connected to a valid played word
+			return false;
+		
+		if (!allPlayedTilesAreAligned(currentPlayer)) // Not all the played Tiles are vertical or horizontal with one another
+			return false;
+		
+		return Dictionary.wordExists(getWord(currentPlayer)); // The formed word does not exist
+	}// end placedValidWord
+	
+	/**
+	 * It returns a string constructed from the chars of all the Tiles aligned with the recently played Tiles.
+	 * It must only be used when we are sure all the played tiles are aligned with one another.
+	 *
+	 * @return the formed word as a String object
+	 */
+	private String getWord(Player currentPlayer)
+	{
+		char[]	wordChars;
+		int		beginning, end, height;
+		Tile	tile;
+		
+		tile		= currentPlayer.getPlayedTiles().get(0);
+		
+		// horizontal, the y coordinate will be the same for all tiles
+		height		= tile.getGridSpace().getyCoordinate();
+		beginning	= tile.getGridSpace().getxCoordinate();
+		end			= tile.getGridSpace().getxCoordinate();
+		while (beginning >= 1 && Board.instance().getGrid()[height][beginning - 1].getTile() != null)
+			beginning--;
+		while (end <= 13 && Board.instance().getGrid()[height][end + 1].getTile() != null)
+			end++;
+		
+		if (beginning == end) // It was not horizontal
+		{
+			// vertical, the x coordinate will be the same for all tiles
+			height		= tile.getGridSpace().getxCoordinate();
+			beginning	= tile.getGridSpace().getyCoordinate();
+			end			= tile.getGridSpace().getyCoordinate();
+			while (beginning >= 1 && Board.instance().getGrid()[beginning - 1][height].getTile() != null)
+				beginning--;
+			while (end <= 13 && Board.instance().getGrid()[end + 1][height].getTile() != null)
+				end++;
+			
+			wordChars = new char[end - beginning + 1]; // end - beginning + 1 -> number of letters in the word
+			for (int i = 0, y = beginning; y <= end; i++, y++)
+				wordChars[i] = Board.instance().getGrid()[y][height].getTile().getLetter();
+		}
+		else // It was horizontal
+		{
+			wordChars = new char[end - beginning + 1]; // end - beginning + 1 -> number of letters in the word
+			for (int i = 0, x = beginning; x <= end; i++, x++)
+				wordChars[i] = Board.instance().getGrid()[height][x].getTile().getLetter();
+		}// end if - else
+		
+		return new String(wordChars);
+	}// end getWord
+	
+	/**
+	 * Gets the tiles of the recently played word. These are probably more than just the played tiles, thus the importance
+	 * of this function
+	 *
+	 * @return an array of Tile objects ordered
+	 */
+	private Tile[] getWordTiles(Player currentPlayer)
+	{
+		int		beginning, end, height;
+		Tile	tile;
+		Tile[]	wordTiles;
+		
+		tile		= currentPlayer.getPlayedTiles().get(0);
+		
+		// horizontal, the y coordinate will be the same for all tiles
+		height		= tile.getGridSpace().getyCoordinate();
+		beginning	= tile.getGridSpace().getxCoordinate();
+		end			= tile.getGridSpace().getxCoordinate();
+		while (beginning >= 1 && Board.instance().getGrid()[height][beginning - 1].getTile() != null)
+			beginning--;
+		while (end <= 13 && Board.instance().getGrid()[height][end + 1].getTile() != null)
+			end++;
+		
+		if (beginning == end) // It was not horizontal
+		{
+			// vertical, the x coordinate will be the same for all tiles
+			height		= tile.getGridSpace().getxCoordinate();
+			beginning	= tile.getGridSpace().getyCoordinate();
+			end			= tile.getGridSpace().getyCoordinate();
+			while (beginning >= 1 && Board.instance().getGrid()[beginning - 1][height].getTile() != null)
+				beginning--;
+			while (end <= 13 && Board.instance().getGrid()[end + 1][height].getTile() != null)
+				end++;
+			
+			wordTiles = new Tile[end - beginning + 1]; // end - beginning + 1 -> number of letters in the word
+			for (int i = 0, y = beginning; y <= end; i++, y++)
+				wordTiles[i] = Board.instance().getGrid()[y][height].getTile();
+		}
+		else // It was horizontal
+		{
+			wordTiles = new Tile[end - beginning + 1]; // end - beginning + 1 -> number of letters in the word
+			for (int i = 0, x = beginning; x <= end; i++, x++)
+				wordTiles[i] = Board.instance().getGrid()[height][x].getTile();
+		}// end if - else
+		
+		return wordTiles;
+	}// end getWordTiles
+	
+	/**
+	 * This function determines whether any of the recently played tiles is connected to a word that
+	 * was already played on the board or was played on the center of the board.
+	 *
+	 * @return true if any played tile is connected / false no played tile is connected
+	 */
+	private boolean anyPlayedTileIsConnected(Player currentPlayer)
+	{
+		int x, y;
+		
+		for (Tile t : currentPlayer.getPlayedTiles())
+		{
+			x	= t.getGridSpace().getxCoordinate();
+			y	= t.getGridSpace().getyCoordinate();
+			
+			if (x == 7 && y == 7)
+				return true;
+			
+			if (Board.instance().getGrid()[y][(x == 14) ? x - 1 : x + 1].wasUsed()) // The word is connected right
+				return true;
+			
+			if (Board.instance().getGrid()[y][Math.abs(x - 1)].wasUsed())           // The word is connected left
+				return true;
+			
+			if (Board.instance().getGrid()[Math.abs(y - 1)][x].wasUsed())           // The word is connected up
+				return true;
+			
+			if (Board.instance().getGrid()[(y == 14) ? y - 1 : y + 1][x].wasUsed()) // The word is connected down
+				return true;
+		}// end foreach
+		
+		return false;
+	}// end anyPlayedTileIsConnected
+	
+	/**
+	 * Determines whether all the played tiles are aligned vertically or horizontally
+	 *
+	 * @return true if the tiles are a aligned / false if they are not aligned
+	 */
+	private boolean allPlayedTilesAreAligned(Player currentPlayer)
+	{
+		int x, y;
+		
+		y = currentPlayer.getPlayedTiles().get(0).getGridSpace().getyCoordinate();// Horizontal
+		for (Tile horizontalTile : currentPlayer.getPlayedTiles())
+		{
+			if (horizontalTile.getGridSpace().getyCoordinate() != y) // It is not horizontal
+			{
+				
+				x = currentPlayer.getPlayedTiles().get(0).getGridSpace().getxCoordinate();// Vertical
+				for (Tile verticalTile : currentPlayer.getPlayedTiles())
+					if (verticalTile.getGridSpace().getxCoordinate() != x) // It is neither vertical
+						return false;
+					
+				break;
+			}// end if
+		}// end foreach
+		
+		return true;
+	}// end allPlayedTilesAreAligned
+	
+	/**
+	 * Method that uses an Adder and a Multiplier classes that implement the Bridge software design pattern
+	 *
+	 * @return the score for playing the most recent word
+	 */
+	private int calculateWordScore(Tile[] wordTiles)
+	{
+		int					sum;
+		AbstractAdder		adder;
+		AbstractMultiplier	multiplier;
+		String				highestBonus;
+		String				currentBonus;
+		
+		sum = 0;
+		
+		for (Tile t : wordTiles)
+		{
+			adder	= new Adder(t.getGridSpace().wasUsed() ? "simple" : t.getGridSpace().getType());
+			sum		+= adder.add(t);
+		}// end foreach
+		
+		highestBonus = "simple";
+		
+		for (Tile t : wordTiles)
+		{
+			if (t.getGridSpace().getType().contains("word") && !t.getGridSpace().wasUsed())
+			{
+				currentBonus	= t.getGridSpace().getType();
+				highestBonus	= highestBonus.equals("simple") ? currentBonus : highestBonus;
+				highestBonus	= (highestBonus.compareTo(currentBonus) < 0) ? currentBonus : highestBonus;
+			}// end if
+			
+			t.getGridSpace().setUsed(true);
+		}// end foreach
+		
+		multiplier = new Multiplier(highestBonus);
+		
+		return multiplier.multiply(sum);
+	}// end calculateWordScore
 	
 	@Override
 	public void handle(ActionEvent event)
 	{
 		if (event.getSource() == view.placeWordButton)
 		{
-			// TODO: Fill this thing, you are almost there
-			/*
-			 * Al final de aqui habra que volver a poner un Caretaker.keep(currentplayer)
-			 * esto, después de haber cambiado al current player
-			 */
+			if (placedValidWord(currentPlayer))
+			{
+				currentPlayer.setScore(currentPlayer.getScore() + calculateWordScore(getWordTiles(currentPlayer)));
+				currentPlayer.setPlayedTiles(new LinkedList<>());
+				currentPlayer.refillTiles();
+			}
+			else
+			{
+				Caretaker.undo(currentPlayer); // If the player had some tiles on the board, we dissociate them
+			}// end if - else
+			
+			hideCurrentPlayerTiles();
+			currentPlayer = (currentPlayer == firstPlayer) ? secondPlayer : firstPlayer; // We change players
+			Caretaker.keep(currentPlayer);
+			updateView();
 		}// end if - player wants to place a word
+		
 		if (event.getSource() == view.cancelWordButton)
 		{
 			hideCurrentPlayerTiles();
@@ -193,8 +409,8 @@ public class Game implements EventHandler<ActionEvent>
 				
 				selectedTile = null;
 				hideCurrentPlayerTiles();
-				currentPlayer.retakeTiles();
 				Caretaker.undo(currentPlayer); // If the player had some tiles on the board, we dissociate them
+				currentPlayer.retakeTiles();
 				currentPlayer = (currentPlayer == firstPlayer) ? secondPlayer : firstPlayer; // We change players
 				Caretaker.keep(currentPlayer); // We remember the initial state of the players tiles
 				updateView();
@@ -254,4 +470,19 @@ public class Game implements EventHandler<ActionEvent>
 		
 		System.out.println(clickedGridSpace.getyCoordinate() + ", " + clickedGridSpace.getxCoordinate());
 	}// end handleGridSpaceClicks - MouseEvent
+	
+	public void handleTileClicks(MouseEvent event)
+	{
+		Tile clickedTile = ((Tile) event.getSource());
+		
+		if (selectedTile != null)
+			selectedTile.setEffect(null);
+		
+		if (clickedTile.getGridSpace() == null)
+		{
+			selectedTile = clickedTile;
+			selectedTile.setEffect(new DropShadow(10, 0f, 0d, Color.DEEPSKYBLUE));
+			System.out.println(selectedTile); // TODO: Delete this line
+		}// end if
+	}// end handleTileClicks
 }// end Game - class

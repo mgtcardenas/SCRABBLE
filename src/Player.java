@@ -1,6 +1,5 @@
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Scanner;
 
 /**
  * @author Marco Cárdenas
@@ -52,6 +51,11 @@ public class Player
 	{
 		return playedTiles;
 	}// end getPlayedTiles
+	
+	public void setPlayedTiles(List<Tile> playedTiles)
+	{
+		this.playedTiles = playedTiles;
+	}// end setPlayedTiles
 		// endregion Getters & Setters
 	
 	/**
@@ -94,138 +98,11 @@ public class Player
 	public void retakeTiles() throws Exception
 	{
 		this.returnTiles();
-		for (int i = 0; i < 7; i++)
-			this.takeTile();
+		this.refillTiles();
+		// TODO: Delete this
+		// for (int i = 0; i < 7; i++)
+		// this.takeTile();
 	}// end retakeTiles
-	
-	/**
-	 * The player performs a move that can either be forming a word, passing or retaking tiles
-	 */
-	public void makeMove() throws Exception
-	{
-		boolean	madeMove	= false;
-		Scanner	sc			= new Scanner(System.in);
-		
-		do
-		{
-			System.out.println("What would you like to do " + this.getName() + " ?");
-			System.out.println("(1) Place Word    (2) Retake Tiles    (3) Pass");
-			System.out.print("Your tiles are -> ");
-			for (Tile t : this.tiles)
-				System.out.print(t.getLetter() + "-" + t.getValue() + " ");
-			
-			switch (sc.nextInt())
-			{
-				case 1:
-					madeMove = placeWord(); // placeWord return boolean if indeed the player tried to place a word
-					break;
-				
-				case 2:
-					retakeTiles();
-					madeMove = true;
-					break;
-				
-				case 3:
-					pass();
-					madeMove = true;
-					break;
-				
-				default:
-					System.out.println("Please make a move");
-					break;
-			}// end switch
-		}while (!madeMove); // end do-while
-	}// end makeMove
-	
-	/**
-	 * The player attempts to form a word with it's tiles by putting them
-	 * on a specific GridSpace of the Board. A player can place one of his / her
-	 * Tiles, cancel the word (causing a memento to be used) or confirm the word
-	 * (which will test if the placed Tiles form a word)
-	 */
-	private boolean placeWord()
-	{
-		boolean	madeMove	= false;
-		boolean	placedWord	= false;
-		Scanner	sc			= new Scanner(System.in);
-		
-		Caretaker.keep(this);
-		
-		do
-		{
-			System.out.println("What would you like to do, " + this.getName() + " ?");
-			System.out.println("(1) Place Tile    (2) Confirm    (3) Cancel    (4) Exit");
-			System.out.print("Your tiles are    ");
-			for (Tile t : this.tiles)
-				System.out.print(t.getLetter() + "-" + t.getValue() + " ");
-			
-			switch (sc.nextInt())
-			{
-				case 1:
-					placeTile();
-					break;
-				
-				case 2:
-					if (isValidWord())
-					{
-						this.score			+= calculateWordScore(getWordTiles());
-						this.playedTiles	= new LinkedList<>(); // The played tiles were used
-					}
-					else
-						Caretaker.undo(this);
-					
-					placedWord = true;
-					madeMove = true;
-					break;
-				
-				case 3:
-					Caretaker.undo(this); // We undo the changes
-					Caretaker.keep(this); // We prepare if the user makes another cancel
-					break;
-				
-				case 4:
-					Caretaker.undo(this);
-					madeMove = true;
-					break;
-				
-				default:
-					System.out.println("Please make a move");
-					break;
-			}// end switch
-		}while (!madeMove); // end do-while
-		
-		return placedWord;
-	}// end placeWord
-	
-	/**
-	 * Puts a single Tile on the Board. This removes it from the players Tile list
-	 */
-	private void placeTile()
-	{
-		int		x, y, index;
-		
-		// TODO: Put security so if the user makes a mistake, the game keeps running
-		Scanner	sc	= new Scanner(System.in);
-		System.out.println("Give me the coordinates...");
-		System.out.print("X: ");
-		x = sc.nextInt();
-		System.out.print("Y: ");
-		y = sc.nextInt();
-		System.out.print("Which letter do you want to put there? (Give Index): ");
-		index = sc.nextInt();
-		
-		// TODO: Add security for when the tile was already used!
-		
-		// Associate the Tile with the GridSpace and Viceversa
-		this.tiles.get(index).setGridSpace(Board.instance().getGrid()[y][x]);
-		Board.instance().getGrid()[y][x].setTile(this.tiles.get(index));
-		
-		System.out.println("The Tile " + this.tiles.get(index).getLetter() + " was put in " + y + "," + x);
-		
-		// Remove the Tile from the players tiles and put it in it's played tiles
-		this.playedTiles.add(this.tiles.get(index));
-		this.tiles.remove(index);
-	}// end placeTile
 	
 	/**
 	 * Checks whether the tiles just put in the board form a valid word
@@ -442,14 +319,6 @@ public class Player
 		
 		return multiplier.multiply(sum);
 	}// end calculateWordScore
-	
-	/**
-	 * The player does nothing, he / she waits for his / her opponent to make a move
-	 */
-	public void pass()
-	{
-		System.out.println(this.getName() + " passed");
-	}// end pass
 	
 	/**
 	 * Creates a Memento object with the current titles of the player
