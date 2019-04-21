@@ -23,13 +23,17 @@ public class Game implements EventHandler<ActionEvent>
 	private Bag		bag;
 	private View	view;
 	private Tile	selectedTile;
+	private int		finalRoundCounter;
+	private int		consecutivePasses;
 	
 	public Game(Board board, Bag bag, Player player1, Player player2, View view) throws Exception
 	{
-		this.board			= board;
-		this.bag			= bag;
-		this.view			= view;
-		this.selectedTile	= null;
+		this.board				= board;
+		this.bag				= bag;
+		this.view				= view;
+		this.selectedTile		= null;
+		this.finalRoundCounter	= 2;
+		this.consecutivePasses	= 0;
 		
 		assignFirstAndSecondPlayer(player1, player2);
 		
@@ -63,7 +67,7 @@ public class Game implements EventHandler<ActionEvent>
 		view.toggleVisibleButton.setText("Show Tiles");
 	}// end updateView
 	
-	public void displayCurrentPlayerTiles()
+	private void displayCurrentPlayerTiles()
 	{
 		for (int i = 0; i < currentPlayer.getTiles().size(); i++)
 		{
@@ -76,7 +80,7 @@ public class Game implements EventHandler<ActionEvent>
 		}// end for - i
 	}// end displayCurrentPlayerTiles
 	
-	public void hideCurrentPlayerTiles()
+	private void hideCurrentPlayerTiles()
 	{
 		for (Tile t : currentPlayer.getTiles())
 			view.getChildren().remove(t);
@@ -90,7 +94,7 @@ public class Game implements EventHandler<ActionEvent>
 	 * decide who goes first in the game. Thus we will know who is the first player
 	 * and who is the second player
 	 */
-	public void assignFirstAndSecondPlayer(Player player1, Player player2) throws Exception
+	private void assignFirstAndSecondPlayer(Player player1, Player player2) throws Exception
 	{
 		do
 		{
@@ -117,31 +121,31 @@ public class Game implements EventHandler<ActionEvent>
 		this.secondPlayer.returnTiles();
 	}// end assignFirstAndSecondPlayer
 	
-	public void play() throws Exception
-	{
-		Alert alert = new Alert(Alert.AlertType.INFORMATION);
-		alert.setTitle("Game Results");
-		alert.setHeaderText("It looks like...");
-		alert.setContentText("I have a great message for you!");
-		
-		if (firstPlayer.getScore() > secondPlayer.getScore())
-			alert.setContentText(firstPlayer.getName() + "Won!");
-		else if (firstPlayer.getScore() < secondPlayer.getScore())
-			alert.setContentText(secondPlayer.getName() + "Won!");
-		else
-			alert.setContentText("It's a Draw");
-		
-		alert.showAndWait();
-	}// end play
-	
 	public void alertOrderOfPlayers()
 	{
 		Alert alert = new Alert(Alert.AlertType.INFORMATION);
 		alert.setTitle("Order of Players");
 		alert.setHeaderText("Guess What...");
-		alert.setContentText(firstPlayer.getName() + " got a letter closer to 'A' so he / she will play first and " + secondPlayer.getName() + " will play second");
+		alert.setContentText(firstPlayer.getName() + " got a letter closer to 'A' so he / she will finish first and " + secondPlayer.getName() + " will finish second");
 		alert.showAndWait();
 	}// end alertOrderOfPlayers
+	
+	private void finish()
+	{
+		Alert alert = new Alert(Alert.AlertType.INFORMATION);
+		alert.setTitle("Game Results");
+		alert.setHeaderText("It looks like...");
+		alert.setContentText("In The End");
+		
+		if (firstPlayer.getScore() > secondPlayer.getScore())
+			alert.setContentText(firstPlayer.getName() + " Won!");
+		else if (firstPlayer.getScore() < secondPlayer.getScore())
+			alert.setContentText(secondPlayer.getName() + " Won!");
+		else
+			alert.setContentText("It's a Draw");
+		
+		alert.showAndWait();
+	}// end finish
 	
 	/**
 	 * Checks whether the tiles just put in the board form a valid word
@@ -366,14 +370,21 @@ public class Game implements EventHandler<ActionEvent>
 			{
 				currentPlayer.setScore(currentPlayer.getScore() + calculateWordScore(getWordTiles(currentPlayer)));
 				currentPlayer.setPlayedTiles(new LinkedList<>());
-				currentPlayer.refillTiles();
 			}
 			else
 			{
 				Caretaker.undo(currentPlayer); // If the player had some tiles on the board, we dissociate them
 			}// end if - else
 			
+			if (bag.isEmpty()) // Final Round
+				finalRoundCounter--;
+			
+			if (finalRoundCounter == 0)
+				finish();
+			
+			consecutivePasses = 0;
 			hideCurrentPlayerTiles();
+			currentPlayer.refillTiles();
 			currentPlayer = (currentPlayer == firstPlayer) ? secondPlayer : firstPlayer; // We change players
 			Caretaker.keep(currentPlayer);
 			updateView();
@@ -398,6 +409,17 @@ public class Game implements EventHandler<ActionEvent>
 			currentPlayer = (currentPlayer == firstPlayer) ? secondPlayer : firstPlayer; // We change players
 			Caretaker.keep(currentPlayer); // We remember the initial state of the players tiles
 			updateView();
+			
+			if (bag.isEmpty()) // Final Round
+				finalRoundCounter--;
+			
+			if (finalRoundCounter == 0)
+				finish();
+			
+			consecutivePasses++;
+			
+			if (consecutivePasses == 4)
+				finish();
 		}// end if - player passed
 		
 		if (event.getSource() == view.exchangeTilesButton)
@@ -414,6 +436,12 @@ public class Game implements EventHandler<ActionEvent>
 				currentPlayer = (currentPlayer == firstPlayer) ? secondPlayer : firstPlayer; // We change players
 				Caretaker.keep(currentPlayer); // We remember the initial state of the players tiles
 				updateView();
+				
+				if (bag.isEmpty()) // Final Round
+					finalRoundCounter--;
+				
+				if (finalRoundCounter == 0)
+					finish();
 			}
 			catch (Exception e)
 			{
