@@ -29,13 +29,12 @@ public class Main extends Application
 		
 		game.alertOrderOfPlayers();
 		view.setEventHandlersAndActionListeners(game);
+		game.updateView();
 		
 		primaryStage.setTitle("Scrabble");
 		primaryStage.setScene(new Scene(view, View.SCENE_WIDTH, View.SCENE_HEIGHT));
 		primaryStage.setResizable(false);
 		primaryStage.show();
-		
-		game.play();
 	}// end start
 	
 	public static String[] getNames()

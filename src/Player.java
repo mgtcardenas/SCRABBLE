@@ -446,7 +446,7 @@ public class Player
 	/**
 	 * The player does nothing, he / she waits for his / her opponent to make a move
 	 */
-	private void pass()
+	public void pass()
 	{
 		System.out.println(this.getName() + " passed");
 	}// end pass

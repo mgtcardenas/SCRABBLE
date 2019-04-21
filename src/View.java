@@ -4,7 +4,6 @@ import java.util.List;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ToggleButton;
-import javafx.scene.effect.DropShadow;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
@@ -41,7 +40,6 @@ public class View extends AnchorPane
 	Button						placeWordButton;
 	
 	ToggleButton				toggleVisibleButton;
-	static List<Tile>			currentPlayerTiles;
 	
 	public View() throws Exception
 	{
@@ -69,7 +67,7 @@ public class View extends AnchorPane
 		this.exchangeTilesButton	= new Button("Exchange Tiles");
 		this.cancelWordButton		= new Button("Cancel Word");
 		this.placeWordButton		= new Button("Place Word");
-		this.toggleVisibleButton	= new ToggleButton("Visible Tiles");
+		this.toggleVisibleButton	= new ToggleButton("Show Tiles");
 		
 		getChildren().addAll(this.playersTurn, this.playersScore);
 		getChildren().addAll(this.doubleLetterLegend, this.tripleLetterLegend, this.doubleWordLegend, this.tripleWordLegend);
@@ -137,12 +135,21 @@ public class View extends AnchorPane
 				getChildren().add(gridSpace);
 			}// end for - x
 		}// end for - y
-		
-		currentPlayerTiles = new LinkedList<>();
-		
 	}// end buildComponents
 	
 	public void setEventHandlersAndActionListeners(Game controller) throws Exception
+	{
+		listenForAllGridSpaces(controller);
+		listenForAllTiles(controller);
+		
+		this.passButton.setOnAction(controller);
+		this.exchangeTilesButton.setOnAction(controller);
+		this.cancelWordButton.setOnAction(controller);
+		this.placeWordButton.setOnAction(controller);
+		this.toggleVisibleButton.selectedProperty().addListener(controller::changed);
+	}// end setEventHandlersAndActionListeners
+	
+	private void listenForAllGridSpaces(Game controller)
 	{
 		GridSpace gridSpace; // Event Handlers for GridSpaces
 		for (int y = 0; y < board.getGrid().length; y++)
@@ -153,35 +160,30 @@ public class View extends AnchorPane
 				gridSpace.setOnMouseClicked(controller::handleGridSpaceClicks);
 			}// end for - x
 		}// end for - y
-		
-		Tile tile;
-		
-		for (int i = 0; i < 100; i++) // You can't just do this you will eventually try to access
+	}// end listenForAllGridSpaces
+	
+	private void listenForAllTiles(Game controller) throws Exception
+	{
+		Tile		tile		= null;
+		List<Tile>	tilesMemory	= new LinkedList<>();
+		while (!bag.isEmpty()) // All Tiles in Bag
 		{
-			tile = Bag.instance().takeTile();
-			tile.setEffect(new DropShadow(10, 0f, 0d, Color.DEEPSKYBLUE));
-			tile.setOnMouseClicked(e -> System.out.println("I'm a Tile"));
-			currentPlayerTiles.add(tile);
-		}// end for - i
+			tile = bag.takeTile();
+			tile.setOnMouseClicked(controller::handleTileClicks);
+			tilesMemory.add(tile);
+		}// end while
 		
-		for (Tile t : currentPlayerTiles)
-			Bag.instance().putTile(t);
+		for (Tile t : tilesMemory)
+			bag.putTile(t);
 		
-		// region for method updateView
-		Player newPlayer = new Player("Dummy");
-		newPlayer.refillTiles();
-		for (int i = 0; i < newPlayer.getTiles().size(); i++)
-		{
-			newPlayer.getTiles().get(i).setLayoutX((i + 18) * Tile.TILE_SIZE + i * 30);
-			newPlayer.getTiles().get(i).setLayoutY(3 * Tile.TILE_SIZE);
-			getChildren().add(newPlayer.getTiles().get(i));
-		}// end for - i
-			// endregion for method updateView
+		/*
+		 * At this point, the players have already taken some tiles and they will not be in the bag,
+		 * so we must listen for those tiles too
+		 */
+		for (Tile t : controller.getFirstPlayer().getTiles())
+			t.setOnMouseClicked(controller::handleTileClicks);
 		
-		this.passButton.setOnAction(controller);
-		this.exchangeTilesButton.setOnAction(controller);
-		this.cancelWordButton.setOnAction(controller);
-		this.placeWordButton.setOnAction(controller);
-		this.toggleVisibleButton.selectedProperty().addListener(controller::changed);
-	}// end setEventHandlersAndActionListeners
+		for (Tile t : controller.getSecondPlayer().getTiles())
+			t.setOnMouseClicked(controller::handleTileClicks);
+	}// end listenForAllTiles
 }// end View - class
