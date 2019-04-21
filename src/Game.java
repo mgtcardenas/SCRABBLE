@@ -445,6 +445,10 @@ public class Game implements EventHandler<ActionEvent>
 		
 		if (event.getSource() == view.cancelWordButton)
 		{
+			if (selectedTile != null)
+				selectedTile.setEffect(null);
+			
+			selectedTile = null;
 			hideCurrentPlayerTiles();
 			Caretaker.undo(currentPlayer);
 			Caretaker.keep(currentPlayer);
@@ -551,8 +555,6 @@ public class Game implements EventHandler<ActionEvent>
 				
 				selectedTile.setLayoutX(clickedGridSpace.getLayoutX()); // Move the tile on top of the selected GridSpace
 				selectedTile.setLayoutY(clickedGridSpace.getLayoutY());
-				
-				System.out.println("I will get " + selectedTile.getLetter() + " - " + selectedTile.getValue());
 				
 				selectedTile.setEffect(null);
 				selectedTile = null;
