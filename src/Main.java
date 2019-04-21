@@ -5,10 +5,21 @@ import javafx.scene.Scene;
 import javafx.scene.control.TextInputDialog;
 import javafx.stage.Stage;
 
+/**
+ * @author Marco Cárdenas
+ *
+ *         The class that represents the whole application and where all the control begins
+ */
 public class Main extends Application
 {
+	/**
+	 * Obligatory method because of JavaFX
+	 * 
+	 * @param  primaryStage     the main 'window'
+	 * @throws CheaterException if somehow the player wants to return a tile that is not missing from the bag
+	 */
 	@Override
-	public void start(Stage primaryStage) throws Exception
+	public void start(Stage primaryStage) throws CheaterException
 	{
 		Bag			bag;    // Model
 		Board		board;  // Model
@@ -37,6 +48,11 @@ public class Main extends Application
 		primaryStage.show();
 	}// end start
 	
+	/**
+	 * Performs a dialog to get the names of the two players of the game
+	 * 
+	 * @return an array of String objects of size 2 that contains the names of the players
+	 */
 	public static String[] getNames()
 	{
 		Optional<String>	playerOneName;
@@ -63,6 +79,11 @@ public class Main extends Application
 		return new String[] { playerOneName.get(), playerTwoName.get() };
 	}// end getNames
 	
+	/**
+	 * The method where all control begins
+	 * 
+	 * @param args the program arguments
+	 */
 	public static void main(String[] args)
 	{
 		launch(args);

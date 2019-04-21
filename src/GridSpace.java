@@ -6,7 +6,10 @@ import javafx.scene.shape.Rectangle;
  * @author Marco Cárdenas
  *
  *         A class that represents each individual space/box on the board.
- *         Each gridspace is of a particular type and has a multiplier
+ *         Each gridspace is of a particular type and has a multiplier.
+ *         It may also have a Tile associated to it and is represented
+ *         as a StackPane with a rectangle that varies in color depending
+ *         on the type attribute
  */
 public class GridSpace extends StackPane
 {
@@ -19,7 +22,7 @@ public class GridSpace extends StackPane
 	private Rectangle			rectangle;
 	
 	/**
-	 * Class constructor
+	 * To create a GridSpace it is only necessary to give the type and the coordinates on the Board
 	 *
 	 * @param type either "simple", "double-letter", "triple-letter", "double-word" or "triple-word"
 	 * @param y    the row this tile is located at, counting from 0

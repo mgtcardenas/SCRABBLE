@@ -18,12 +18,12 @@ public class Board
 	 * to their correct locations with their correct
 	 * types and bonuses.
 	 *
-	 * @throws Exception if someone tries to create another bag
+	 * @throws SingletonException if someone tries to create another bag
 	 */
-	private Board() throws Exception
+	private Board() throws SingletonException
 	{
 		if (uniqueInstance != null)
-			throw new Exception("THERE CAN ONLY BE ONE BOARD!");
+			throw new SingletonException("THERE CAN ONLY BE ONE BOARD!");
 		
 		// Create a board of 15 by 15 spaces (255 in total)
 		this.grid = new GridSpace[15][15];
@@ -120,7 +120,7 @@ public class Board
 			{
 				uniqueInstance = new Board(); // we try to create the Board
 			}
-			catch (Exception e)
+			catch (SingletonException e)
 			{
 				e.printStackTrace();
 			}// end try - catch

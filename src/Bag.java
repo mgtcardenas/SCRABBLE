@@ -22,12 +22,12 @@ public class Bag
 	 * This constructor adds 100 tiles with the correct characters
 	 * and values to the bag, thus creating it
 	 *
-	 * @throws Exception if someone tries to create another bag
+	 * @throws SingletonException if someone tries to create another bag
 	 */
-	private Bag() throws Exception
+	private Bag() throws SingletonException
 	{
 		if (uniqueInstance != null)
-			throw new Exception("THERE CAN ONLY BE ONE BAG!");
+			throw new SingletonException("THERE CAN ONLY BE ONE BAG!");
 		
 		this.missingTiles	= new LinkedList<>();
 		this.tiles			= new LinkedList<>();
@@ -94,7 +94,7 @@ public class Bag
 			{
 				uniqueInstance = new Bag(); // we try to create the bag
 			}
-			catch (Exception e)
+			catch (SingletonException e)
 			{
 				e.printStackTrace();
 			}// end try - catch
@@ -127,7 +127,7 @@ public class Bag
 	 * 
 	 * @param tile the tile to be added
 	 */
-	public void putTile(Tile tile) throws Exception
+	public void putTile(Tile tile) throws CheaterException
 	{
 		if (missingTiles.contains(tile))
 		{
@@ -135,7 +135,7 @@ public class Bag
 			this.missingTiles.remove(tile);
 		}
 		else
-			throw new Exception("CHEATER, CHEATER, PUMPKIN EATER");
+			throw new CheaterException("CHEATER, CHEATER, PUMPKIN EATER");
 	}// end putTile
 	
 	/**

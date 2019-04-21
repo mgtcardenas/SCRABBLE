@@ -4,8 +4,10 @@ import java.util.List;
 /**
  * @author Marco Cárdenas
  *
- *         Class that represent a Player
- *         A player may have a score and some tiles to finish with
+ *         Class that represent a Player, who must have a name and has a score
+ *         as well as tiles and played tiles. The tiles attribute represent the
+ *         avaliable tiles a player can use that are not currently on the Board.
+ *         Played tiles are the player's tiles that are on the board
  */
 public class Player
 {
@@ -16,7 +18,7 @@ public class Player
 	
 	/**
 	 * When we create a new player, his/her score is 0
-	 * and he has no tiles to finish with
+	 * and he / she has no tiles to begin with
 	 */
 	public Player(String name)
 	{
@@ -59,7 +61,7 @@ public class Player
 		// endregion Getters & Setters
 	
 	/**
-	 * Makes the player take a tile from the Bag
+	 * Makes the player take a random tile from the Bag
 	 */
 	public void takeTile()
 	{
@@ -70,9 +72,9 @@ public class Player
 	/**
 	 * Makes the player return all of his/her tiles to the bag
 	 *
-	 * @throws Exception if somehow the player wants to return a tile that is not missing from the bag
+	 * @throws CheaterException if somehow the player wants to return a tile that is not missing from the bag
 	 */
-	public void returnTiles() throws Exception
+	public void returnTiles() throws CheaterException
 	{
 		for (int i = this.tiles.size() - 1; i >= 0; i--) // reverse is very important since size() will be changing as we remove
 		{
@@ -82,7 +84,7 @@ public class Player
 	}// end returnTiles
 	
 	/**
-	 * The player refills his tiles so he / she now has 7 as long as the bag is not empty
+	 * The player refills his / her tiles so he / she now has 7 as long as the bag is not empty
 	 */
 	public void refillTiles()
 	{
@@ -91,11 +93,11 @@ public class Player
 	}// end refillTiles
 	
 	/**
-	 * The player changes all of his/her tiles to the bag and takes another 7 if possible
+	 * The player changes all of his / her tiles to the bag and takes another 7 if possible
 	 *
-	 * @throws Exception - If the player attempts to cheat by returning tiles that don't belong to the set
+	 * @throws CheaterException if somehow the player wants to return a tile that is not missing from the bag
 	 */
-	public void retakeTiles() throws Exception
+	public void retakeTiles() throws CheaterException
 	{
 		this.returnTiles();
 		this.refillTiles();

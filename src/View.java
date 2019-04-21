@@ -17,7 +17,7 @@ public class View extends AnchorPane
 {
 	public static final double	SCENE_WIDTH		= 1500;
 	public static final double	SCENE_HEIGHT	= 900;
-	public static final double	OFFSET			= 15;
+	public static final double	OFFSET			= 15; // A value that helps move visual elements just a bit so they look right
 	
 	Board						board;
 	Bag							bag;
@@ -41,14 +41,21 @@ public class View extends AnchorPane
 	
 	ToggleButton				toggleVisibleButton;
 	
-	public View() throws Exception
+	/**
+	 * It is not necessary to give the Bag or the Board as arguments since they are singletons, but the
+	 * View does use them to build itself
+	 */
+	public View()
 	{
 		this.board	= Board.instance();
 		this.bag	= Bag.instance();
 		buildComponents();
 	}// end View
 	
-	private void buildComponents() throws Exception
+	/**
+	 * Place all of the visual elements where they should go
+	 */
+	private void buildComponents()
 	{
 		this.playersTurn			= new Label("First Players Turn");
 		this.playersScore			= new Label("Points: ");
@@ -137,7 +144,13 @@ public class View extends AnchorPane
 		}// end for - y
 	}// end buildComponents
 	
-	public void setEventHandlersAndActionListeners(Game controller) throws Exception
+	/**
+	 * Gives functionality to the visual elements by placing action listeners or event handlers
+	 *
+	 * @param  controller       a Game of Scrabble
+	 * @throws CheaterException if somehow a player tries to return a Tile that is not part of the set of tiles of the Bag
+	 */
+	public void setEventHandlersAndActionListeners(Game controller) throws CheaterException
 	{
 		listenForAllGridSpaces(controller);
 		listenForAllTiles(controller);
@@ -149,6 +162,11 @@ public class View extends AnchorPane
 		this.toggleVisibleButton.selectedProperty().addListener(controller::changed);
 	}// end setEventHandlersAndActionListeners
 	
+	/**
+	 * Give functionality only to the GridSpaces of the Board
+	 * 
+	 * @param controller a Game of Scrabble
+	 */
 	private void listenForAllGridSpaces(Game controller)
 	{
 		GridSpace gridSpace; // Event Handlers for GridSpaces
@@ -162,11 +180,16 @@ public class View extends AnchorPane
 		}// end for - y
 	}// end listenForAllGridSpaces
 	
-	private void listenForAllTiles(Game controller) throws Exception
+	/**
+	 * Give functionality only to the Tiles of the Bag
+	 *
+	 * @param controller a Game of Scrabble
+	 */
+	private void listenForAllTiles(Game controller) throws CheaterException
 	{
 		Tile		tile		= null;
 		List<Tile>	tilesMemory	= new LinkedList<>();
-		while (!bag.isEmpty()) // All Tiles in Bag
+		while (!bag.isEmpty()) // To All Tiles in Bag
 		{
 			tile = bag.takeTile();
 			tile.setOnMouseClicked(controller::handleTileClicks);
@@ -177,8 +200,8 @@ public class View extends AnchorPane
 			bag.putTile(t);
 		
 		/*
-		 * At this point, the players have already taken some tiles and they will not be in the bag,
-		 * so we must listen for those tiles too
+		 * At this point of the application, the players have already taken some
+		 * tiles and they will not be in the bag, but we must listen for those tiles too
 		 */
 		for (Tile t : controller.getFirstPlayer().getTiles())
 			t.setOnMouseClicked(controller::handleTileClicks);

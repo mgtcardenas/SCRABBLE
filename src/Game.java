@@ -12,7 +12,7 @@ import javafx.scene.paint.Color;
  * @author Marco Cárdenas
  *
  *         This class reperesents a Game of Scrabble and is the Controller in this MVC application.
- *         The rest of the classes form the Model (Player, Bag, Board, Tile, GridSpace, etc.)
+ *         The rest of the classes, except the View, belong to the Model (Player, Bag, Board, Tile, GridSpace, etc.)
  */
 public class Game implements EventHandler<ActionEvent>
 {
@@ -26,7 +26,18 @@ public class Game implements EventHandler<ActionEvent>
 	private int		finalRoundCounter;
 	private int		consecutivePasses;
 	
-	public Game(Board board, Bag bag, Player player1, Player player2, View view) throws Exception
+	/**
+	 * Some of these arguments are not strictly necessary, but they are there because they make sense.
+	 * THe important arguments are the player1, the player2 and the view
+	 * 
+	 * @param  board            a Scrabble board
+	 * @param  bag              a Scrabble bag full of Scrabble Tiles
+	 * @param  player1          a player
+	 * @param  player2          a player
+	 * @param  view             a pane with all the visual elements on it
+	 * @throws CheaterException
+	 */
+	public Game(Board board, Bag bag, Player player1, Player player2, View view) throws CheaterException
 	{
 		this.board				= board;
 		this.bag				= bag;
@@ -56,6 +67,10 @@ public class Game implements EventHandler<ActionEvent>
 	}// end getSecondPlayer
 		// endregion Getters
 	
+	/**
+	 * Update the current players score and whose turn currently is. Also, hide the current players tiles
+	 * so the previous player can't see them and cheat. Used every time a players turn ends
+	 */
 	public void updateView()
 	{
 		view.playersTurn.setText("Turn: " + currentPlayer.getName()); // update the status labels
@@ -67,11 +82,14 @@ public class Game implements EventHandler<ActionEvent>
 		view.toggleVisibleButton.setText("Show Tiles");
 	}// end updateView
 	
+	/**
+	 * Add the only current player tiles to the view
+	 */
 	private void displayCurrentPlayerTiles()
 	{
 		for (int i = 0; i < currentPlayer.getTiles().size(); i++)
 		{
-			if (!view.getChildren().contains(currentPlayer.getTiles().get(i)))
+			if (!view.getChildren().contains(currentPlayer.getTiles().get(i))) // The view may already contain the Tiles when the Controller may update the view
 			{
 				currentPlayer.getTiles().get(i).setLayoutX((i + 18) * Tile.TILE_SIZE + i * 30);
 				currentPlayer.getTiles().get(i).setLayoutY(3 * Tile.TILE_SIZE);
@@ -80,6 +98,9 @@ public class Game implements EventHandler<ActionEvent>
 		}// end for - i
 	}// end displayCurrentPlayerTiles
 	
+	/**
+	 * Remove both the current player tiles and played tiles from the view
+	 */
 	private void hideCurrentPlayerTiles()
 	{
 		for (Tile t : currentPlayer.getTiles())
@@ -94,7 +115,7 @@ public class Game implements EventHandler<ActionEvent>
 	 * decide who goes first in the game. Thus we will know who is the first player
 	 * and who is the second player
 	 */
-	private void assignFirstAndSecondPlayer(Player player1, Player player2) throws Exception
+	private void assignFirstAndSecondPlayer(Player player1, Player player2) throws CheaterException
 	{
 		do
 		{
@@ -121,6 +142,9 @@ public class Game implements EventHandler<ActionEvent>
 		this.secondPlayer.returnTiles();
 	}// end assignFirstAndSecondPlayer
 	
+	/**
+	 * Inform the players who will go first and who will go second
+	 */
 	public void alertOrderOfPlayers()
 	{
 		Alert alert = new Alert(Alert.AlertType.INFORMATION);
@@ -130,6 +154,9 @@ public class Game implements EventHandler<ActionEvent>
 		alert.showAndWait();
 	}// end alertOrderOfPlayers
 	
+	/**
+	 * Finish the game by alerting the players who won or if it was a draw
+	 */
 	private void finish()
 	{
 		Alert alert = new Alert(Alert.AlertType.INFORMATION);
@@ -149,6 +176,8 @@ public class Game implements EventHandler<ActionEvent>
 	
 	/**
 	 * Checks whether the tiles just put in the board form a valid word
+	 * 
+	 * @param currentPlayer the current player who just placed tiles
 	 */
 	private boolean placedValidWord(Player currentPlayer)
 	{
@@ -168,7 +197,8 @@ public class Game implements EventHandler<ActionEvent>
 	 * It returns a string constructed from the chars of all the Tiles aligned with the recently played Tiles.
 	 * It must only be used when we are sure all the played tiles are aligned with one another.
 	 *
-	 * @return the formed word as a String object
+	 * @param  currentPlayer the current player who just placed tiles
+	 * @return               the formed word as a String object
 	 */
 	private String getWord(Player currentPlayer)
 	{
@@ -213,10 +243,11 @@ public class Game implements EventHandler<ActionEvent>
 	}// end getWord
 	
 	/**
-	 * Gets the tiles of the recently played word. These are probably more than just the played tiles, thus the importance
-	 * of this function
+	 * Gets the tiles of the recently played word.
+	 * These are probably more than just the played tiles, thus the importance of this function
 	 *
-	 * @return an array of Tile objects ordered
+	 * @param  currentPlayer the current player who just placed tiles
+	 * @return               an array of ordered Tile objects
 	 */
 	private Tile[] getWordTiles(Player currentPlayer)
 	{
@@ -261,10 +292,11 @@ public class Game implements EventHandler<ActionEvent>
 	}// end getWordTiles
 	
 	/**
-	 * This function determines whether any of the recently played tiles is connected to a word that
-	 * was already played on the board or was played on the center of the board.
+	 * This function determines whether any of the recently played tiles of a current player
+	 * is connected to a word that was already played on the board or was played crossing the center of the board.
 	 *
-	 * @return true if any played tile is connected / false no played tile is connected
+	 * @param  currentPlayer the current player who just placed tiles
+	 * @return               true if any played tile is connected / false no played tile is connected
 	 */
 	private boolean anyPlayedTileIsConnected(Player currentPlayer)
 	{
@@ -295,9 +327,10 @@ public class Game implements EventHandler<ActionEvent>
 	}// end anyPlayedTileIsConnected
 	
 	/**
-	 * Determines whether all the played tiles are aligned vertically or horizontally
+	 * Determines whether all the played tiles of a current player are aligned vertically or horizontally
 	 *
-	 * @return true if the tiles are a aligned / false if they are not aligned
+	 * @param  currentPlayer the current player who just placed tiles
+	 * @return               true if the tiles are a aligned / false if they are not aligned
 	 */
 	private boolean allPlayedTilesAreAligned(Player currentPlayer)
 	{
@@ -323,8 +356,10 @@ public class Game implements EventHandler<ActionEvent>
 	
 	/**
 	 * Method that uses an Adder and a Multiplier classes that implement the Bridge software design pattern
+	 * to calculate the correct score for a word given the context and situation
 	 *
-	 * @return the score for playing the most recent word
+	 * @param  wordTiles the array of ordered Tile objects that represent the word of the current player played tiles
+	 * @return           the score for playing the most recent word
 	 */
 	private int calculateWordScore(Tile[] wordTiles)
 	{
@@ -361,6 +396,24 @@ public class Game implements EventHandler<ActionEvent>
 		return multiplier.multiply(sum);
 	}// end calculateWordScore
 	
+	/**
+	 * Depending on the button pressed...
+	 *
+	 * Places the word of a player using his / her turn and giving points if the word is
+	 * validly placed and exists in the dictionary and resets the consecutive passes counter to 0.
+	 * If the bag is empty, the final round counter takes place and the game may end after placing the word.
+	 *
+	 * Cancels the word, taking the current players played tiles from the board and repositioning them
+	 * in the normal tiles, also dissociating them from the GridSpaces on the Board.
+	 *
+	 * Passes the turn of the current player, incrementing the consecutive passes counter by 1.
+	 * If the bag is empty, the final round counter takes place and the game may end after placing the word.
+	 *
+	 * Exchanges the current players Tiles for another set.
+	 * If the bag is empty, the final round counter takes place and the game may end after placing the word
+	 * 
+	 * @param event the ActionEvent that occurs when a player clicks any of the four main buttons
+	 */
 	@Override
 	public void handle(ActionEvent event)
 	{
@@ -443,13 +496,20 @@ public class Game implements EventHandler<ActionEvent>
 				if (finalRoundCounter == 0)
 					finish();
 			}
-			catch (Exception e)
+			catch (CheaterException e)
 			{
 				e.printStackTrace();
 			}// end try - catch
 		}// end if - player exchanged tiles
 	}// end handle - ActionEvent
 	
+	/**
+	 * Turns the current players tiles visible or invisible so the other player can't see them and cheat
+	 *
+	 * @param observable the on / off status of the toggle button
+	 * @param oldValue   the previos on / off value of the toggle button
+	 * @param newValue   the new on / off value of the toggle button
+	 */
 	public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue)
 	{
 		if (newValue) // since new value is a boolean, then if the new value is true / active button, then we set them visible
@@ -466,6 +526,13 @@ public class Game implements EventHandler<ActionEvent>
 		}// end if - else
 	}// end changed
 	
+	/**
+	 * Put the selected tile (if present) on top of the clicked GridSpace, associate both of them, remove the selectedTile
+	 * from the current players normal tiles and put it in its played tiles. Finally, remove the selected DropShadow effect
+	 * from the selected Tile and forget about the selected Tile
+	 *
+	 * @param event the MouseEvent that occurs when a player clicks on a GridSpace.
+	 */
 	public void handleGridSpaceClicks(MouseEvent event)
 	{
 		GridSpace clickedGridSpace = ((GridSpace) event.getSource());
@@ -473,9 +540,7 @@ public class Game implements EventHandler<ActionEvent>
 		if (selectedTile != null)
 		{
 			if (clickedGridSpace.getTile() != null)
-			{
 				System.out.println("You can't place a tile on top of another");
-			}
 			else
 			{
 				selectedTile.setGridSpace(clickedGridSpace); // Associate the Tile with the GridSpace and Viceversa
@@ -496,9 +561,14 @@ public class Game implements EventHandler<ActionEvent>
 		else
 			System.out.println("You have not selected a tile");
 		
-		System.out.println(clickedGridSpace.getyCoordinate() + ", " + clickedGridSpace.getxCoordinate());
 	}// end handleGridSpaceClicks - MouseEvent
 	
+	/**
+	 * Set the the clicked tile to be the selected tile and apply a DropShadow effect on it.
+	 * Remove this effect from the previously selected Tile
+	 *
+	 * @param event the MouseEvent that occurs when a player clicks on a Tile
+	 */
 	public void handleTileClicks(MouseEvent event)
 	{
 		Tile clickedTile = ((Tile) event.getSource());
@@ -510,7 +580,6 @@ public class Game implements EventHandler<ActionEvent>
 		{
 			selectedTile = clickedTile;
 			selectedTile.setEffect(new DropShadow(10, 0f, 0d, Color.DEEPSKYBLUE));
-			System.out.println(selectedTile); // TODO: Delete this line
 		}// end if
 	}// end handleTileClicks
 }// end Game - class

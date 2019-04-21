@@ -7,17 +7,25 @@ import javafx.scene.shape.Rectangle;
  * @author Marco Cárdenas
  *
  *         Class that represents each of the tiles a player must use to form words.
- *         Each tile has a letter and a value
+ *         Each tile has a letter, a value and is represented as a StackPane that has
+ *         a Rectangle and a Label on top of it respectively. Each Tile can have one
+ *         GridSpace associated to it
  */
 public class Tile extends StackPane
 {
-	public static final double	TILE_SIZE	= 50;
+	public static final double	TILE_SIZE	= 50; // for the view
 	private char				letter;
 	private int					value;
 	private GridSpace			gridSpace;
 	private Rectangle			rectangle;
 	private Label				label;
 	
+	/**
+	 * To create a Tile, only a letter and a value are necessary
+	 * 
+	 * @param letter the letter this tile represents
+	 * @param value  how many points this tile will give when played by itself
+	 */
 	public Tile(char letter, int value)
 	{
 		this.letter		= letter;
