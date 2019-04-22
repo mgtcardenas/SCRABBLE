@@ -10,7 +10,7 @@ import javafx.stage.Stage;
  *
  *         The class that represents the whole application and where all the control begins
  */
-public class Main extends Application
+public class Scrabble extends Application
 {
 	/**
 	 * Obligatory method because of JavaFX
@@ -88,4 +88,4 @@ public class Main extends Application
 	{
 		launch(args);
 	}// end main
-}// end Main - class
+}// end Scrabble - class

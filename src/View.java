@@ -70,6 +70,11 @@ public class View extends AnchorPane
 		this.doubleWordRectangle	= new Rectangle(GridSpace.GRIDSPACE_SIZE, GridSpace.GRIDSPACE_SIZE, Color.HOTPINK);
 		this.tripleWordRectangle	= new Rectangle(GridSpace.GRIDSPACE_SIZE, GridSpace.GRIDSPACE_SIZE, Color.RED);
 		
+		this.doubleLetterRectangle.setStroke(Color.BLACK);
+		this.tripleLetterRectangle.setStroke(Color.BLACK);
+		this.doubleWordRectangle.setStroke(Color.BLACK);
+		this.tripleWordRectangle.setStroke(Color.BLACK);
+		
 		this.passButton				= new Button("Pass");
 		this.exchangeTilesButton	= new Button("Exchange Tiles");
 		this.cancelWordButton		= new Button("Cancel Word");

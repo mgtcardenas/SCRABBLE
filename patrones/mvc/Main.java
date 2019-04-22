@@ -19,4 +19,4 @@ public class Main
 		controller.actualizaElView();       // se inicia el contenido del view
 		view.inicia();                      // Se inicia la ejecuci�n de la aplicaci�n.
 	}// end main
-}// end Main - class
+}// end Scrabble - class

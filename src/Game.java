@@ -28,7 +28,7 @@ public class Game implements EventHandler<ActionEvent>
 	
 	/**
 	 * Some of these arguments are not strictly necessary, but they are there because they make sense.
-	 * THe important arguments are the player1, the player2 and the view
+	 * The important arguments are the player1, the player2 and the view
 	 * 
 	 * @param  board            a Scrabble board
 	 * @param  bag              a Scrabble bag full of Scrabble Tiles
@@ -186,7 +186,7 @@ public class Game implements EventHandler<ActionEvent>
 		if (currentPlayer.getPlayedTiles().size() == 0) // There are no played Tiles
 			return false;
 		
-		if ((connectedGridSpace = anyPlayedTileIsConnected(currentPlayer)) == null) // The played Tiles are not connected to a valid played word
+		if ((connectedGridSpace = onlyOnePlayedTileIsConnected(currentPlayer)) == null) // The played Tiles are not connected to a valid played word
 			return false;
 		
 		if (!allPlayedTilesAreAligned(currentPlayer, connectedGridSpace)) // Not all the played Tiles are vertical or horizontal with one another
@@ -300,33 +300,48 @@ public class Game implements EventHandler<ActionEvent>
 	 * @param  currentPlayer the current player who just placed tiles
 	 * @return               true if any played tile is connected / false no played tile is connected
 	 */
-	private GridSpace anyPlayedTileIsConnected(Player currentPlayer)
+	private GridSpace onlyOnePlayedTileIsConnected(Player currentPlayer)
 	{
-		int x, y;
+		GridSpace	connectionGridSpace;
+		int			x, y;
+		
+		connectionGridSpace = null;
 		
 		for (Tile t : currentPlayer.getPlayedTiles())
 		{
 			x	= t.getGridSpace().getxCoordinate();
 			y	= t.getGridSpace().getyCoordinate();
 			
+			if (Board.instance().getGrid()[y][(x == 14) ? x - 1 : x + 1].wasUsed()) // The word is connected right
+				if (connectionGridSpace == null)
+					connectionGridSpace = Board.instance().getGrid()[y][(x == 14) ? x - 1 : x + 1];
+				else // This is the second time, this happens, so the word shan't be valid
+					return null;
+				
+			if (Board.instance().getGrid()[y][Math.abs(x - 1)].wasUsed())           // The word is connected left
+				if (connectionGridSpace == null)
+					connectionGridSpace = Board.instance().getGrid()[y][Math.abs(x - 1)];
+				else
+					return null;
+				
+			if (Board.instance().getGrid()[Math.abs(y - 1)][x].wasUsed())           // The word is connected up
+				if (connectionGridSpace == null)
+					connectionGridSpace = Board.instance().getGrid()[Math.abs(y - 1)][x];
+				else
+					return null;
+				
+			if (Board.instance().getGrid()[(y == 14) ? y - 1 : y + 1][x].wasUsed()) // The word is connected down
+				if (connectionGridSpace == null)
+					connectionGridSpace = Board.instance().getGrid()[(y == 14) ? y - 1 : y + 1][x];
+				else
+					return null;
+				
 			if (x == 7 && y == 7)
 				return Board.instance().getGrid()[7][7];
-			
-			if (Board.instance().getGrid()[y][(x == 14) ? x - 1 : x + 1].wasUsed()) // The word is connected right
-				return Board.instance().getGrid()[y][(x == 14) ? x - 1 : x + 1];
-			
-			if (Board.instance().getGrid()[y][Math.abs(x - 1)].wasUsed())           // The word is connected left
-				return Board.instance().getGrid()[y][Math.abs(x - 1)];
-			
-			if (Board.instance().getGrid()[Math.abs(y - 1)][x].wasUsed())           // The word is connected up
-				return Board.instance().getGrid()[Math.abs(y - 1)][x];
-			
-			if (Board.instance().getGrid()[(y == 14) ? y - 1 : y + 1][x].wasUsed()) // The word is connected down
-				return Board.instance().getGrid()[(y == 14) ? y - 1 : y + 1][x];
 		}// end foreach
 		
-		return null;
-	}// end anyPlayedTileIsConnected
+		return connectionGridSpace;
+	}// end onlyOnePlayedTileIsConnected
 	
 	/**
 	 * Determines whether all the played tiles of a current player are aligned vertically or horizontally

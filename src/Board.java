@@ -40,6 +40,14 @@ public class Board
 	}// end Board - constructor
 	
 	/**
+	 * Gives access to the grid on the board
+	 */
+	public GridSpace[][] getGrid()
+	{
+		return this.grid;
+	}// end getGrid
+	
+	/**
 	 * Puts the double letter type GridSpace objects in their correct positions.
 	 * It takes advantage of the symmetry in which the grid spaces are to be placed
 	 */
@@ -128,12 +136,4 @@ public class Board
 		
 		return uniqueInstance;
 	}// end instance
-	
-	/**
-	 * Gives access to the grid on the board
-	 */
-	public GridSpace[][] getGrid()
-	{
-		return this.grid;
-	}// end getGrid
 }// end Board - class

@@ -1,3 +1,5 @@
+The class that contains the main method is Scrabble (if you want to run it)
+
 This source code implements my version of the Scrabble table top game, since not all the rules of that game are
 strictly followed. This game does not support saving.
 
