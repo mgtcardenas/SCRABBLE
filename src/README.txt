@@ -1,4 +1,5 @@
-The class that contains the main method is Scrabble (if you want to run it)
+The class that contains the main method is Scrabble (if you want to run it). I REQUIRE you to use Java8 since this
+is the version that includes the JavaFX GUI framework on the JDK.
 
 This source code implements my version of the Scrabble table top game, since not all the rules of that game are
 strictly followed. This game does not support saving.
